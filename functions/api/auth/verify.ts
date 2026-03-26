@@ -25,26 +25,19 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     return new Response('Missing token', { status: 400 });
   }
 
-  // Look up token
+  // Look up token (allow reuse within expiry window — email clients pre-fetch links)
   const row = await env.DB.prepare(
-    'SELECT token, email, expires_at, used FROM magic_tokens WHERE token = ?'
+    'SELECT token, email, expires_at FROM magic_tokens WHERE token = ?'
   ).bind(token).first() as any;
 
   if (!row) {
     return redirectWithError(env, request, 'Invalid or expired link. Request a new one.');
   }
 
-  if (row.used) {
-    return redirectWithError(env, request, 'This link has already been used. Request a new one.');
-  }
-
   if (new Date(row.expires_at) < new Date()) {
     await env.DB.prepare('DELETE FROM magic_tokens WHERE token = ?').bind(token).run();
     return redirectWithError(env, request, 'This link has expired. Request a new one.');
   }
-
-  // Mark token as used
-  await env.DB.prepare('UPDATE magic_tokens SET used = 1 WHERE token = ?').bind(token).run();
 
   // Upsert user
   const email = row.email;
