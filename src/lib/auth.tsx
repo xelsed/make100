@@ -48,7 +48,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const login = async (email: string): Promise<{ ok: boolean; error?: string }> => {
+  const login = async (email: string): Promise<{ ok: boolean; error?: string; devLink?: string }> => {
     try {
       const res = await fetch('/api/auth/login', {
         method: 'POST',
@@ -57,8 +57,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
       const data = await res.json();
       if (!res.ok) return { ok: false, error: data.error || 'Login failed' };
-      await refresh();
-      return { ok: true };
+      return { ok: true, devLink: data.devLink };
     } catch {
       return { ok: false, error: 'Network error' };
     }
