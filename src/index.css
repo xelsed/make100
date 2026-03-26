@@ -15,84 +15,148 @@
 
 @layer components {
   .glass {
-    @apply bg-surface border border-white/[0.06] rounded-2xl;
+    background-color: #0f1117;
+    @apply border border-white/[0.06] rounded-2xl;
   }
 
   .glass-hover {
-    @apply hover:bg-surface-hover hover:border-white/[0.1] transition-all duration-200;
+    @apply transition-all duration-200;
+  }
+
+  .glass-hover:hover {
+    background-color: #1c2132;
+    border-color: rgba(255, 255, 255, 0.1);
   }
 
   .gradient-text {
-    @apply bg-gradient-to-r from-lime to-lime-bright bg-clip-text text-transparent;
+    background-image: linear-gradient(to right, #a3e635, #d9f99d);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
 
   .post-card {
-    @apply bg-surface border border-white/[0.06] rounded-2xl p-6 animate-slide-up glass-hover cursor-default;
+    background-color: #0f1117;
+    @apply border border-white/[0.06] rounded-2xl p-6 animate-slide-up cursor-default transition-all duration-200;
+  }
+
+  .post-card:hover {
+    background-color: #1c2132;
+    border-color: rgba(255, 255, 255, 0.1);
   }
 
   .btn-primary {
-    @apply bg-lime text-base font-semibold px-5 py-2.5 rounded-xl transition-all duration-200 active:scale-[0.97] hover:bg-lime-bright;
+    background-color: #a3e635;
+    color: #08090d;
+    @apply font-semibold px-5 py-2.5 rounded-xl transition-all duration-200;
   }
 
   .btn-primary:hover {
+    background-color: #d9f99d;
     box-shadow: 0 0 20px rgba(163, 230, 53, 0.2);
   }
 
+  .btn-primary:active {
+    transform: scale(0.97);
+  }
+
   .btn-ghost {
-    @apply hover:bg-surface-hover text-txt-secondary hover:text-txt font-medium px-4 py-2 rounded-xl transition-all duration-200;
+    color: #6b6f7b;
+    @apply font-medium px-4 py-2 rounded-xl transition-all duration-200;
+  }
+
+  .btn-ghost:hover {
+    background-color: #1c2132;
+    color: #f0eeeb;
   }
 
   .input-field {
-    @apply bg-surface-raised border border-white/[0.06] rounded-xl px-4 py-2.5 text-txt placeholder-txt-muted focus:outline-none focus:border-lime/30 focus:ring-1 focus:ring-lime/10 transition-all duration-200;
+    background-color: #171b26;
+    color: #f0eeeb;
+    @apply border border-white/[0.06] rounded-xl px-4 py-2.5 transition-all duration-200;
+  }
+
+  .input-field::placeholder {
+    color: #464a55;
+  }
+
+  .input-field:focus {
+    outline: none;
+    border-color: rgba(163, 230, 53, 0.3);
+    box-shadow: 0 0 0 1px rgba(163, 230, 53, 0.1);
   }
 
   .tag {
-    @apply inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-surface-raised text-txt-secondary border border-white/[0.06] hover:border-lime/20 hover:text-lime transition-colors;
+    background-color: #171b26;
+    color: #6b6f7b;
+    @apply inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium border border-white/[0.06] transition-colors;
+  }
+
+  .tag:hover {
+    border-color: rgba(163, 230, 53, 0.2);
+    color: #a3e635;
   }
 }
 
 .markdown-body h1 {
-  @apply text-2xl font-bold mb-4 mt-6 text-txt;
+  @apply text-2xl font-bold mb-4 mt-6;
+  color: #f0eeeb;
 }
 
 .markdown-body h2 {
-  @apply text-xl font-semibold mb-3 mt-5 text-txt;
+  @apply text-xl font-semibold mb-3 mt-5;
+  color: #f0eeeb;
 }
 
 .markdown-body h3 {
-  @apply text-lg font-semibold mb-2 mt-4 text-txt;
+  @apply text-lg font-semibold mb-2 mt-4;
+  color: #f0eeeb;
 }
 
 .markdown-body p {
-  @apply mb-3 leading-relaxed text-txt-secondary;
+  @apply mb-3 leading-relaxed;
+  color: #6b6f7b;
 }
 
 .markdown-body ul {
-  @apply list-disc pl-6 mb-3 space-y-1 text-txt-secondary;
+  @apply list-disc pl-6 mb-3 space-y-1;
+  color: #6b6f7b;
 }
 
 .markdown-body ol {
-  @apply list-decimal pl-6 mb-3 space-y-1 text-txt-secondary;
+  @apply list-decimal pl-6 mb-3 space-y-1;
+  color: #6b6f7b;
 }
 
 .markdown-body code {
-  @apply font-mono text-sm bg-lime-glow px-1.5 py-0.5 rounded text-lime;
+  @apply font-mono text-sm px-1.5 py-0.5 rounded;
+  background-color: rgba(163, 230, 53, 0.15);
+  color: #a3e635;
 }
 
 .markdown-body pre {
-  @apply bg-base border border-white/[0.06] rounded-xl p-4 mb-4 overflow-x-auto;
+  background-color: #08090d;
+  @apply border border-white/[0.06] rounded-xl p-4 mb-4 overflow-x-auto;
 }
 
 .markdown-body pre code {
-  @apply bg-transparent px-0 py-0 text-txt-secondary;
+  @apply bg-transparent px-0 py-0;
+  color: #6b6f7b;
 }
 
 .markdown-body blockquote {
-  @apply border-l-2 border-lime-dim pl-4 italic text-txt-muted mb-3;
+  @apply pl-4 italic mb-3;
+  border-left: 2px solid #65a30d;
+  color: #464a55;
 }
 
 .markdown-body a {
-  @apply text-accent-secondary hover:text-lime underline underline-offset-2 transition-colors;
+  color: #818cf8;
+  @apply underline underline-offset-2 transition-colors;
+}
+
+.markdown-body a:hover {
+  color: #a3e635;
 }
 
 .markdown-body img {
@@ -100,5 +164,6 @@
 }
 
 .markdown-body hr {
-  @apply border-white/[0.06] my-6;
+  @apply my-6;
+  border-color: rgba(255, 255, 255, 0.06);
 }
