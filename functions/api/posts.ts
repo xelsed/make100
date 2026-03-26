@@ -9,6 +9,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
   const cursor = url.searchParams.get('cursor');
   const limit = Math.min(parseInt(url.searchParams.get('limit') || '20'), 50);
   const currentUser = (context.data as any).user;
+  const currentUserId = currentUser?.id || '__anonymous__';
 
   let query = `
     SELECT p.*, u.name as user_name, u.email as user_email, u.avatar_url as user_avatar_url,
@@ -18,7 +19,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     JOIN users u ON p.user_id = u.id
     WHERE (p.visibility = 'shared' OR p.user_id = ?)
   `;
-  const bindings: unknown[] = [currentUser.id];
+  const bindings: unknown[] = [currentUserId];
 
   if (userId) {
     query += ' AND p.user_id = ?';

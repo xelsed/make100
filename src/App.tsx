@@ -11,15 +11,15 @@ function AppRoutes() {
   const { user, loading } = useAuth();
 
   if (loading) return null;
-  if (!user) return <Login />;
 
   return (
     <Layout>
       <Routes>
         <Route path="/" element={<Feed />} />
         <Route path="/post/:id" element={<PostDetail />} />
-        <Route path="/new" element={<PostEditor />} />
-        <Route path="/settings" element={<Settings />} />
+        <Route path="/new" element={user ? <PostEditor /> : <Login />} />
+        <Route path="/settings" element={user ? <Settings /> : <Login />} />
+        <Route path="/login" element={<Login />} />
       </Routes>
     </Layout>
   );

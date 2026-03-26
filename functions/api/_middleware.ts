@@ -58,8 +58,27 @@ export const onRequest: PagesFunction<Env>[] = [
       });
     }
 
-    // Auth routes are public (login, logout)
-    if (url.pathname.startsWith('/api/auth/')) {
+    // Public routes — no auth required
+    const isAuthRoute = url.pathname.startsWith('/api/auth/');
+    const isMediaRoute = url.pathname.startsWith('/api/media/');
+    const isPublicGet = request.method === 'GET' && (
+      url.pathname.startsWith('/api/posts') ||
+      url.pathname === '/api/users'
+    );
+
+    if (isAuthRoute || isMediaRoute || isPublicGet) {
+      // Still try to resolve user if cookie exists (for visibility filtering)
+      const secret = env.SESSION_SECRET || 'make100-dev-secret-change-me';
+      const cookies = request.headers.get('Cookie') || '';
+      const sessionToken = parseCookie(cookies, 'm100_session');
+      if (sessionToken) {
+        const payload = await verifyToken(sessionToken, secret);
+        if (payload?.sub) {
+          const existing = await env.DB.prepare('SELECT id, email, name FROM users WHERE id = ?').bind(payload.sub).first();
+          if (existing) (data as any).user = existing;
+        }
+      }
+
       const response = await context.next();
       const newResponse = new Response(response.body, response);
       newResponse.headers.set('Access-Control-Allow-Origin', '*');

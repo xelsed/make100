@@ -5,13 +5,14 @@ interface Env {
 export const onRequestGet: PagesFunction<Env> = async (context) => {
   const postId = context.params.id as string;
   const currentUser = (context.data as any).user;
+  const currentUserId = currentUser?.id || '__anonymous__';
 
   const post = await context.env.DB.prepare(
     `SELECT p.*, u.name as user_name, u.email as user_email, u.avatar_url as user_avatar_url,
             u.github_username as user_github_username
      FROM posts p JOIN users u ON p.user_id = u.id
      WHERE p.id = ? AND (p.visibility = 'shared' OR p.user_id = ?)`
-  ).bind(postId, currentUser.id).first();
+  ).bind(postId, currentUserId).first();
 
   if (!post) {
     return Response.json({ error: 'Post not found' }, { status: 404 });
