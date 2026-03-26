@@ -1,32 +1,37 @@
 import { useState } from 'react';
 import { SmilePlus } from 'lucide-react';
-import type { Post } from '@/types';
-import { addReaction, removeReaction, getCurrentUser } from '@/lib/store';
-import { EMOJI_OPTIONS } from '@/lib/mock-data';
+import { api } from '@/lib/api';
+import { useAuth } from '@/lib/auth';
+
+const EMOJI_OPTIONS = ['🔥', '❤️', '🤯', '👀', '🎉', '💡', '🚀', '✨'];
 
 interface ReactionBarProps {
-  post: Post;
+  postId: string;
+  reactions: any[];
 }
 
-export default function ReactionBar({ post }: ReactionBarProps) {
+export default function ReactionBar({ postId, reactions: initialReactions }: ReactionBarProps) {
   const [showPicker, setShowPicker] = useState(false);
-  const currentUser = getCurrentUser();
+  const [reactions, setReactions] = useState(initialReactions);
+  const { user } = useAuth();
 
-  const grouped = post.reactions.reduce<Record<string, { count: number; hasOwn: boolean }>>((acc, r) => {
+  const grouped = reactions.reduce<Record<string, { count: number; hasOwn: boolean }>>((acc, r) => {
     if (!acc[r.emoji]) acc[r.emoji] = { count: 0, hasOwn: false };
     acc[r.emoji].count++;
-    if (r.userId === currentUser.id) acc[r.emoji].hasOwn = true;
+    if (r.user_id === user?.id) acc[r.emoji].hasOwn = true;
     return acc;
   }, {});
 
-  function toggleReaction(emoji: string) {
-    const group = grouped[emoji];
-    if (group?.hasOwn) {
-      removeReaction(post.id, emoji);
-    } else {
-      addReaction(post.id, emoji);
-    }
+  async function toggleReaction(emoji: string) {
     setShowPicker(false);
+    try {
+      const result = await api.toggleReaction(postId, emoji);
+      if (result.toggled === 'on') {
+        setReactions(prev => [...prev, { emoji, user_id: user?.id, id: crypto.randomUUID() }]);
+      } else {
+        setReactions(prev => prev.filter(r => !(r.user_id === user?.id && r.emoji === emoji)));
+      }
+    } catch { }
   }
 
   return (
@@ -35,11 +40,10 @@ export default function ReactionBar({ post }: ReactionBarProps) {
         <button
           key={emoji}
           onClick={() => toggleReaction(emoji)}
-          className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs transition-all duration-150 ${
-            hasOwn
+          className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs transition-all duration-150 ${hasOwn
               ? 'bg-brand-600/30 border border-brand-500/40 text-brand-300'
               : 'bg-white/5 border border-white/10 text-gray-400 hover:bg-white/10'
-          }`}
+            }`}
         >
           <span>{emoji}</span>
           <span className="font-medium">{count}</span>
@@ -50,6 +54,7 @@ export default function ReactionBar({ post }: ReactionBarProps) {
         <button
           onClick={() => setShowPicker(!showPicker)}
           className="p-1 rounded-full hover:bg-white/10 text-gray-500 hover:text-gray-300 transition-colors"
+          title="Add reaction"
         >
           <SmilePlus className="w-4 h-4" />
         </button>
@@ -63,6 +68,7 @@ export default function ReactionBar({ post }: ReactionBarProps) {
                   key={emoji}
                   onClick={() => toggleReaction(emoji)}
                   className="p-1.5 rounded-lg hover:bg-white/10 transition-colors text-base"
+                  title={emoji}
                 >
                   {emoji}
                 </button>
