@@ -1,11 +1,11 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Home, PenSquare, Loader2, Settings } from 'lucide-react';
+import { Home, PenSquare, Loader2, Settings, LogOut } from 'lucide-react';
 import UserAvatar from './UserAvatar';
 import { useAuth } from '@/lib/auth';
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const location = useLocation();
-  const { user, loading } = useAuth();
+  const { user, loading, logout } = useAuth();
 
   const navItems = [
     { to: '/', icon: Home, label: 'Feed' },
@@ -61,6 +61,13 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               <>
                 <span className="text-xs text-txt-secondary hidden sm:block">{user.name}</span>
                 <UserAvatar user={user} size="sm" />
+                <button
+                  onClick={logout}
+                  className="p-1.5 rounded-lg text-txt-muted hover:text-danger hover:bg-danger/10 transition-colors"
+                  title="Log out"
+                >
+                  <LogOut className="w-3.5 h-3.5" />
+                </button>
               </>
             )}
           </div>
