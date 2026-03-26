@@ -65,3 +65,18 @@ CREATE TABLE IF NOT EXISTS connected_accounts (
 
 CREATE INDEX IF NOT EXISTS idx_connected_accounts_user_id ON connected_accounts(user_id);
 CREATE UNIQUE INDEX IF NOT EXISTS idx_connected_accounts_unique ON connected_accounts(user_id, platform);
+
+-- Magic link tokens
+CREATE TABLE IF NOT EXISTS magic_tokens (
+  token TEXT PRIMARY KEY,
+  email TEXT NOT NULL,
+  expires_at TEXT NOT NULL,
+  used INTEGER NOT NULL DEFAULT 0
+);
+
+-- Invited emails (individual invites beyond domain whitelist)
+CREATE TABLE IF NOT EXISTS invited_emails (
+  email TEXT PRIMARY KEY,
+  invited_by TEXT REFERENCES users(id),
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);

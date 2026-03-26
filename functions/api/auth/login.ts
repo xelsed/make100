@@ -1,60 +1,77 @@
 interface Env {
   DB: D1Database;
   ALLOWED_DOMAINS: string;
-  SESSION_SECRET?: string;
-}
-
-async function signToken(payload: Record<string, unknown>, secret: string): Promise<string> {
-  const header = btoa(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).replace(/=/g, '');
-  const body = btoa(JSON.stringify(payload)).replace(/=/g, '');
-  const encoder = new TextEncoder();
-  const key = await crypto.subtle.importKey(
-    'raw', encoder.encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']
-  );
-  const sig = await crypto.subtle.sign('HMAC', key, encoder.encode(`${header}.${body}`));
-  const sigStr = btoa(String.fromCharCode(...new Uint8Array(sig))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
-  return `${header}.${body}.${sigStr}`;
+  RESEND_API_KEY?: string;
+  SITE_URL?: string;
 }
 
 export const onRequestPost: PagesFunction<Env> = async (context) => {
-  const { env } = context;
-  const body = await context.request.json() as any;
+  const { env, request } = context;
+  const body = await request.json() as any;
   const email = body.email?.trim()?.toLowerCase();
 
   if (!email || !email.includes('@')) {
     return Response.json({ error: 'Valid email required' }, { status: 400 });
   }
 
+  // Check access: domain whitelist OR individual invite
   const allowedDomains = (env.ALLOWED_DOMAINS || 'nyu.edu').split(',').map(d => d.trim());
   const domain = email.split('@')[1];
+  const domainAllowed = allowedDomains.includes(domain);
 
-  if (!allowedDomains.includes(domain)) {
-    return Response.json({ error: `@${domain} is not an allowed domain` }, { status: 403 });
+  const invited = await env.DB.prepare('SELECT email FROM invited_emails WHERE email = ?').bind(email).first();
+
+  if (!domainAllowed && !invited) {
+    return Response.json({ error: `Not authorized. Need an @${allowedDomains[0]} email or an invite.` }, { status: 403 });
   }
 
-  // Upsert user
-  let user = await env.DB.prepare('SELECT id, email, name FROM users WHERE email = ?').bind(email).first() as any;
+  // Generate magic token (48 random chars, 15 min expiry)
+  const token = Array.from(crypto.getRandomValues(new Uint8Array(36)))
+    .map(b => b.toString(36).padStart(2, '0')).join('').slice(0, 48);
+  const expiresAt = new Date(Date.now() + 15 * 60 * 1000).toISOString();
 
-  if (!user) {
-    const id = crypto.randomUUID();
-    const name = email.split('@')[0];
-    await env.DB.prepare('INSERT INTO users (id, email, name) VALUES (?, ?, ?)').bind(id, email, name).run();
-    user = { id, email, name };
+  // Clean up old tokens for this email, then insert new one
+  await env.DB.prepare('DELETE FROM magic_tokens WHERE email = ? OR expires_at < datetime("now")').bind(email).run();
+  await env.DB.prepare('INSERT INTO magic_tokens (token, email, expires_at) VALUES (?, ?, ?)').bind(token, email, expiresAt).run();
+
+  // Build magic link
+  const siteUrl = env.SITE_URL || new URL(request.url).origin;
+  const magicLink = `${siteUrl}/api/auth/verify?token=${token}`;
+
+  // Send email via Resend (or skip in dev)
+  const resendKey = env.RESEND_API_KEY;
+  if (resendKey) {
+    const emailRes = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${resendKey}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        from: 'make100 <noreply@m100.dev>',
+        to: [email],
+        subject: 'Your make100 login link',
+        html: `
+          <div style="font-family: system-ui, sans-serif; max-width: 400px; margin: 0 auto; padding: 40px 20px;">
+            <div style="background: #18181b; border-radius: 16px; padding: 32px; border: 1px solid rgba(255,255,255,0.06);">
+              <h1 style="color: #84cc16; font-size: 24px; margin: 0 0 8px;">make100</h1>
+              <p style="color: #a1a1aa; font-size: 14px; margin: 0 0 24px;">Click the button below to log in to your workshop.</p>
+              <a href="${magicLink}" style="display: inline-block; background: #84cc16; color: #09090b; font-weight: 600; padding: 12px 24px; border-radius: 12px; text-decoration: none; font-size: 14px;">
+                Enter Workshop
+              </a>
+              <p style="color: #52525b; font-size: 11px; margin: 24px 0 0;">This link expires in 15 minutes. If you didn't request this, ignore this email.</p>
+            </div>
+          </div>
+        `,
+      }),
+    });
+
+    if (!emailRes.ok) {
+      const err = await emailRes.text();
+      console.error('Resend error:', err);
+      return Response.json({ error: 'Failed to send email. Try again.' }, { status: 500 });
+    }
+
+    return Response.json({ ok: true, message: 'Magic link sent! Check your email.' });
   }
 
-  // Create signed session token (7 day expiry)
-  const secret = env.SESSION_SECRET || 'make100-dev-secret-change-me';
-  const token = await signToken({
-    sub: user.id,
-    email: user.email,
-    name: user.name,
-    exp: Math.floor(Date.now() / 1000) + (7 * 24 * 60 * 60),
-  }, secret);
-
-  // Set as httpOnly cookie
-  const headers = new Headers();
-  headers.set('Content-Type', 'application/json');
-  headers.set('Set-Cookie', `m100_session=${token}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${7 * 24 * 60 * 60}; Secure`);
-
-  return new Response(JSON.stringify({ ok: true, user: { id: user.id, email: user.email, name: user.name } }), { headers });
+  // No Resend key = dev mode — return the link directly
+  return Response.json({ ok: true, message: 'Magic link sent! Check your email.', devLink: magicLink });
 };
