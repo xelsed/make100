@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Home, PenSquare, Loader2 } from 'lucide-react';
+import { Home, PenSquare, Loader2, Settings } from 'lucide-react';
 import UserAvatar from './UserAvatar';
 import { useAuth } from '@/lib/auth';
 
@@ -10,6 +10,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const navItems = [
     { to: '/', icon: Home, label: 'Feed' },
     { to: '/new', icon: PenSquare, label: 'New Post' },
+    { to: '/settings', icon: Settings, label: 'Settings' },
   ];
 
   if (loading) {
@@ -45,8 +46,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 key={to}
                 to={to}
                 className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${location.pathname === to
-                    ? 'bg-white/10 text-white'
-                    : 'text-gray-400 hover:text-white hover:bg-white/5'
+                  ? 'bg-white/10 text-white'
+                  : 'text-gray-400 hover:text-white hover:bg-white/5'
                   }`}
               >
                 <Icon className="w-4 h-4" />
