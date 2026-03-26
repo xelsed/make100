@@ -17,21 +17,20 @@ export default function Feed() {
   const [filterTag, setFilterTag] = useState<string | null>(null);
 
   useEffect(() => {
-    loadData();
+    api.getUsers().then(setUsers).catch(() => setUsers([]));
+  }, []);
+
+  useEffect(() => {
+    loadPosts();
   }, [filterTag]);
 
-  async function loadData() {
+  async function loadPosts() {
     setLoading(true);
     try {
-      const [postsResult, usersResult] = await Promise.all([
-        api.getPosts({ tag: filterTag || undefined }),
-        api.getUsers(),
-      ]);
+      const postsResult = await api.getPosts({ tag: filterTag || undefined });
       setPosts(postsResult.posts);
-      setUsers(usersResult);
     } catch {
       setPosts([]);
-      setUsers([]);
     } finally {
       setLoading(false);
     }

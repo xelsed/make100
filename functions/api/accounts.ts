@@ -33,7 +33,11 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     return Response.json({ error: 'Failed to save account' }, { status: 500 });
   }
 
-  return Response.json({ id, platform, username }, { status: 201 });
+  const saved = await context.env.DB.prepare(
+    'SELECT id, platform, username FROM connected_accounts WHERE user_id = ? AND platform = ?'
+  ).bind(user.id, platform).first();
+
+  return Response.json(saved || { id, platform, username }, { status: 201 });
 };
 
 export const onRequestDelete: PagesFunction<Env> = async (context) => {

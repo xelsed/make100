@@ -26,8 +26,9 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
   }
 
   if (tag) {
+    const sanitizedTag = tag.replace(/[%_"\\]/g, '');
     query += " AND p.tags LIKE ?";
-    bindings.push(`%"${tag}"%`);
+    bindings.push(`%"${sanitizedTag}"%`);
   }
 
   if (cursor) {
