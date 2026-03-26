@@ -1,19 +1,52 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, Calendar, Hash, Send } from 'lucide-react';
+import { ArrowLeft, Calendar, Hash, Send, Lock, Loader2 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { usePosts, addComment } from '@/lib/store';
+import { api } from '@/lib/api';
 import UserAvatar from '@/components/UserAvatar';
-import GitHubEmbed from '@/components/GitHubEmbed';
+import EmbedRenderer from '@/components/EmbedRenderer';
 import ReactionBar from '@/components/ReactionBar';
 
 export default function PostDetail() {
   const { id } = useParams<{ id: string }>();
-  const posts = usePosts();
-  const post = posts.find(p => p.id === id);
+  const [post, setPost] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
   const [commentText, setCommentText] = useState('');
+  const [submittingComment, setSubmittingComment] = useState(false);
+
+  useEffect(() => {
+    if (!id) return;
+    api.getPost(id).then(p => {
+      setPost(p);
+      setLoading(false);
+    }).catch(() => setLoading(false));
+  }, [id]);
+
+  async function handleComment(e: React.FormEvent) {
+    e.preventDefault();
+    if (!commentText.trim() || !post) return;
+    setSubmittingComment(true);
+    try {
+      const comment = await api.addComment(post.id, commentText.trim());
+      setPost((prev: any) => ({
+        ...prev,
+        comments: [...(prev.comments || []), comment],
+      }));
+      setCommentText('');
+    } catch { } finally {
+      setSubmittingComment(false);
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-16">
+        <Loader2 className="w-6 h-6 text-gray-500 animate-spin" />
+      </div>
+    );
+  }
 
   if (!post) {
     return (
@@ -26,16 +59,14 @@ export default function PostDetail() {
     );
   }
 
-  function handleComment(e: React.FormEvent) {
-    e.preventDefault();
-    if (!commentText.trim() || !post) return;
-    addComment(post.id, commentText.trim());
-    setCommentText('');
-  }
+  const user = post.user || { name: 'Unknown' };
+  const tags: string[] = Array.isArray(post.tags) ? post.tags : [];
+  const mediaBlocks: any[] = Array.isArray(post.media) ? post.media : [];
+  const reactions: any[] = Array.isArray(post.reactions) ? post.reactions : [];
+  const comments: any[] = Array.isArray(post.comments) ? post.comments : [];
 
   return (
     <div className="max-w-2xl mx-auto">
-      {/* Back link */}
       <Link
         to="/"
         className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-300 transition-colors mb-6"
@@ -45,43 +76,39 @@ export default function PostDetail() {
       </Link>
 
       <article className="glass rounded-2xl p-6 mb-6">
-        {/* Header */}
         <div className="flex items-center gap-3 mb-5">
-          <UserAvatar user={post.user} size="lg" showOnline />
+          <UserAvatar user={user} size="lg" showOnline={false} />
           <div>
-            <span className="font-semibold text-gray-100">{post.user.name}</span>
+            <span className="font-semibold text-gray-100">{user.name}</span>
             <div className="flex items-center gap-2 text-xs text-gray-500">
               <span className="flex items-center gap-1">
                 <Calendar className="w-3 h-3" />
-                Day {post.dayNumber}
+                Day {post.day_number}
               </span>
               <span>·</span>
-              <span>{formatDistanceToNow(new Date(post.createdAt), { addSuffix: true })}</span>
+              <span>{formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}</span>
+              {post.visibility === 'private' && <Lock className="w-3 h-3 text-amber" />}
             </div>
           </div>
         </div>
 
-        {/* Title */}
         <h1 className="text-2xl font-extrabold text-gray-50 mb-6">{post.title}</h1>
 
-        {/* Content */}
         <div className="markdown-body mb-6">
           <ReactMarkdown remarkPlugins={[remarkGfm]}>{post.content}</ReactMarkdown>
         </div>
 
-        {/* Repos */}
-        {post.repos.length > 0 && (
-          <div className="space-y-2 mb-6">
-            {post.repos.map(repo => (
-              <GitHubEmbed key={repo.url} repo={repo} />
+        {mediaBlocks.length > 0 && (
+          <div className="space-y-3 mb-6">
+            {mediaBlocks.map((block: any, i: number) => (
+              <EmbedRenderer key={i} block={block} />
             ))}
           </div>
         )}
 
-        {/* Tags */}
-        {post.tags.length > 0 && (
+        {tags.length > 0 && (
           <div className="flex flex-wrap gap-1.5 mb-6">
-            {post.tags.map(tag => (
+            {tags.map((tag: string) => (
               <span key={tag} className="tag">
                 <Hash className="w-2.5 h-2.5" />
                 {tag}
@@ -90,28 +117,28 @@ export default function PostDetail() {
           </div>
         )}
 
-        {/* Reactions */}
         <div className="pt-4 border-t border-white/5">
-          <ReactionBar post={post} />
+          <ReactionBar postId={post.id} reactions={reactions} />
         </div>
       </article>
 
-      {/* Comments */}
       <div className="glass rounded-2xl p-6">
         <h3 className="font-semibold text-sm text-gray-300 mb-4">
-          Comments ({post.comments.length})
+          Comments ({comments.length})
         </h3>
 
-        {post.comments.length > 0 && (
+        {comments.length > 0 && (
           <div className="space-y-4 mb-6">
-            {post.comments.map(comment => (
+            {comments.map((comment: any) => (
               <div key={comment.id} className="flex gap-3">
-                <UserAvatar user={comment.user} size="sm" />
+                <UserAvatar user={comment.user || { name: comment.user_name || 'Unknown' }} size="sm" />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-0.5">
-                    <span className="text-sm font-medium text-gray-200">{comment.user.name}</span>
+                    <span className="text-sm font-medium text-gray-200">
+                      {comment.user?.name || comment.user_name || 'Unknown'}
+                    </span>
                     <span className="text-xs text-gray-600">
-                      {formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true })}
+                      {formatDistanceToNow(new Date(comment.created_at), { addSuffix: true })}
                     </span>
                   </div>
                   <p className="text-sm text-gray-400 leading-relaxed">{comment.content}</p>
@@ -121,7 +148,6 @@ export default function PostDetail() {
           </div>
         )}
 
-        {/* Comment form */}
         <form onSubmit={handleComment} className="flex gap-2">
           <input
             type="text"
@@ -132,8 +158,9 @@ export default function PostDetail() {
           />
           <button
             type="submit"
-            disabled={!commentText.trim()}
+            disabled={!commentText.trim() || submittingComment}
             className="btn-primary flex items-center gap-1.5 text-sm disabled:opacity-40"
+            title="Post comment"
           >
             <Send className="w-3.5 h-3.5" />
           </button>
