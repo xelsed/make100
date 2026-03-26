@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
+import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
 import { api } from './api';
 
 interface User {
@@ -16,7 +16,7 @@ interface AuthContextType {
   user: User | null;
   loading: boolean;
   error: string | null;
-  login: (email: string) => Promise<{ ok: boolean; error?: string }>;
+  login: (email: string) => Promise<{ ok: boolean; error?: string; devLink?: string }>;
   logout: () => Promise<void>;
   refresh: () => Promise<void>;
 }
@@ -34,6 +34,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const didInit = useRef(false);
 
   const refresh = async () => {
     try {
@@ -71,6 +72,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   useEffect(() => {
+    if (didInit.current) return;
+    didInit.current = true;
     refresh();
   }, []);
 

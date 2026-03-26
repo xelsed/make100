@@ -17,7 +17,6 @@ export default function Login() {
       setError(authError);
       window.history.replaceState({}, '', '/');
     }
-    refresh();
   }, []);
 
   async function handleSubmit(e: React.FormEvent) {
