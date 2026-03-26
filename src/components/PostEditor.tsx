@@ -47,23 +47,36 @@ export default function PostEditor() {
     setLinkLoading(false);
   }
 
-  async function handleImageUpload(files: FileList | null) {
+  const [uploading, setUploading] = useState(false);
+
+  async function handleFileUpload(files: FileList | null) {
     if (!files) return;
+    setUploading(true);
+    setError(null);
     for (const file of Array.from(files)) {
-      if (!file.type.startsWith('image/')) continue;
+      const isImage = file.type.startsWith('image/');
+      const isVideo = file.type.startsWith('video/');
+      if (!isImage && !isVideo) continue;
       try {
         const result = await api.uploadMedia(file);
-        setMedia(prev => [...prev, { type: 'image', url: result.url, alt: file.name }]);
+        const mediaType = result.mediaType || (isVideo ? 'video' : 'image');
+        setMedia(prev => [...prev, {
+          type: mediaType as any,
+          url: result.url,
+          alt: file.name,
+          meta: { contentType: file.type, size: file.size },
+        }]);
       } catch {
-        setError('Image upload failed');
+        setError(`Upload failed for ${file.name}`);
       }
     }
+    setUploading(false);
   }
 
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     setDragOver(false);
-    handleImageUpload(e.dataTransfer.files);
+    handleFileUpload(e.dataTransfer.files);
   }, []);
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
@@ -252,10 +265,10 @@ export default function PostEditor() {
             <input
               ref={fileInputRef}
               type="file"
-              accept="image/*"
+              accept="image/*,video/*"
               multiple
               className="hidden"
-              onChange={e => handleImageUpload(e.target.files)}
+              onChange={e => handleFileUpload(e.target.files)}
             />
           </div>
         </div>
