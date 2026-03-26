@@ -257,10 +257,12 @@ export default function PostEditor() {
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              className="btn-ghost flex items-center gap-1.5 text-sm"
-              title="Upload image"
+              disabled={uploading}
+              className="btn-ghost flex items-center gap-1.5 text-sm disabled:opacity-40"
+              title="Upload image or video"
             >
               <Upload className="w-4 h-4" />
+              {uploading ? 'Uploading...' : 'Upload'}
             </button>
             <input
               ref={fileInputRef}
