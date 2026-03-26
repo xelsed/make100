@@ -2,7 +2,7 @@ interface Env {
   DB: D1Database;
   MEDIA: R2Bucket;
   ALLOWED_DOMAINS: string;
-  DEV_MODE?: string;
+
 }
 
 interface CfAccessJWT {
@@ -60,7 +60,8 @@ export const onRequest: PagesFunction<Env>[] = [
 
     // In development, allow a mock user via X-Dev-Email header
     const cfJwt = request.headers.get('CF-Access-Jwt-Assertion');
-    const isDev = env.DEV_MODE === 'true';
+    const url = new URL(request.url);
+    const isDev = url.hostname === 'localhost' || url.hostname === '127.0.0.1';
 
     let email: string | null = null;
 

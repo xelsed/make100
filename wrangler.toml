@@ -5,9 +5,6 @@ pages_build_output_dir = "dist"
 [vars]
 ALLOWED_DOMAINS = "nyu.edu,itp.nyu.edu"
 
-[env.dev.vars]
-ALLOWED_DOMAINS = "nyu.edu,itp.nyu.edu"
-DEV_MODE = "true"
 
 [[d1_databases]]
 binding = "DB"

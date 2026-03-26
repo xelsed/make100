@@ -15,7 +15,7 @@
 
 @layer components {
   .glass {
-    background-color: #0f1117;
+    background-color: #18181b;
     @apply border border-white/[0.06] rounded-2xl;
   }
 
@@ -24,36 +24,36 @@
   }
 
   .glass-hover:hover {
-    background-color: #1c2132;
+    background-color: #323238;
     border-color: rgba(255, 255, 255, 0.1);
   }
 
   .gradient-text {
-    background-image: linear-gradient(to right, #a3e635, #d9f99d);
+    background-image: linear-gradient(to right, #84cc16, #a3e635);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
 
   .post-card {
-    background-color: #0f1117;
+    background-color: #18181b;
     @apply border border-white/[0.06] rounded-2xl p-6 animate-slide-up cursor-default transition-all duration-200;
   }
 
   .post-card:hover {
-    background-color: #1c2132;
+    background-color: #323238;
     border-color: rgba(255, 255, 255, 0.1);
   }
 
   .btn-primary {
-    background-color: #a3e635;
-    color: #08090d;
+    background-color: #84cc16;
+    color: #09090b;
     @apply font-semibold px-5 py-2.5 rounded-xl transition-all duration-200;
   }
 
   .btn-primary:hover {
-    background-color: #d9f99d;
-    box-shadow: 0 0 20px rgba(163, 230, 53, 0.2);
+    background-color: #a3e635;
+    box-shadow: 0 0 20px rgba(132, 204, 22, 0.25);
   }
 
   .btn-primary:active {
@@ -66,12 +66,12 @@
   }
 
   .btn-ghost:hover {
-    background-color: #1c2132;
+    background-color: #323238;
     color: #f0eeeb;
   }
 
   .input-field {
-    background-color: #171b26;
+    background-color: #27272a;
     color: #f0eeeb;
     @apply border border-white/[0.06] rounded-xl px-4 py-2.5 transition-all duration-200;
   }
@@ -82,19 +82,19 @@
 
   .input-field:focus {
     outline: none;
-    border-color: rgba(163, 230, 53, 0.3);
-    box-shadow: 0 0 0 1px rgba(163, 230, 53, 0.1);
+    border-color: rgba(132, 204, 22, 0.3);
+    box-shadow: 0 0 0 1px rgba(132, 204, 22, 0.1);
   }
 
   .tag {
-    background-color: #171b26;
+    background-color: #27272a;
     color: #6b6f7b;
     @apply inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium border border-white/[0.06] transition-colors;
   }
 
   .tag:hover {
-    border-color: rgba(163, 230, 53, 0.2);
-    color: #a3e635;
+    border-color: rgba(132, 204, 22, 0.25);
+    color: #84cc16;
   }
 }
 
@@ -130,12 +130,12 @@
 
 .markdown-body code {
   @apply font-mono text-sm px-1.5 py-0.5 rounded;
-  background-color: rgba(163, 230, 53, 0.15);
-  color: #a3e635;
+  background-color: rgba(132, 204, 22, 0.12);
+  color: #84cc16;
 }
 
 .markdown-body pre {
-  background-color: #08090d;
+  background-color: #09090b;
   @apply border border-white/[0.06] rounded-xl p-4 mb-4 overflow-x-auto;
 }
 
@@ -156,7 +156,7 @@
 }
 
 .markdown-body a:hover {
-  color: #a3e635;
+  color: #84cc16;
 }
 
 .markdown-body img {

@@ -8,17 +8,17 @@ export default {
         mono: ['JetBrains Mono', 'Fira Code', 'monospace'],
       },
       colors: {
-        base: '#08090d',
+        base: '#09090b',
         surface: {
-          DEFAULT: '#0f1117',
-          raised: '#171b26',
-          hover: '#1c2132',
+          DEFAULT: '#18181b',
+          raised: '#27272a',
+          hover: '#323238',
         },
         lime: {
-          DEFAULT: '#a3e635',
+          DEFAULT: '#84cc16',
           dim: '#65a30d',
-          bright: '#d9f99d',
-          glow: 'rgba(163, 230, 53, 0.15)',
+          bright: '#a3e635',
+          glow: 'rgba(132, 204, 22, 0.12)',
         },
         accent: {
           DEFAULT: '#a3e635',

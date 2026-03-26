@@ -1,79 +1,78 @@
 # make100 — Deployment Tracker
 
-## Deployment Target
+## Current Deployment
+
+- **URL:** <https://make100.pages.dev>
+- **Preview:** <https://4a68c691.make100.pages.dev>
 - **Platform:** Cloudflare Pages + Functions
-- **Domain:** m100.dev
-- **Database:** Cloudflare D1 (`make100-db`)
-- **Storage:** Cloudflare R2 (`make100-media`)
-- **Auth:** Cloudflare Access (email-domain gating)
+- **Domain:** m100.dev *(custom domain not yet configured)*
+- **Database:** Cloudflare D1 — `make100-db` (`0dc70598-cff5-4ceb-82b5-b7344590b9e9`)
+- **Storage:** Cloudflare R2 — `make100-media`
+- **Auth:** Cloudflare Access *(not yet configured — see step 5 below)*
 
 ---
 
-## Pre-Deploy Fixes Applied (2026-03-25)
+## Deployment Log
 
-| # | Fix | File(s) | Status |
-|---|-----|---------|--------|
-| 1 | **Disabled `X-Dev-Email` in production** — dev auth header now gated behind `DEV_MODE` env var (only set in `[env.dev.vars]`) | `functions/api/_middleware.ts`, `wrangler.toml` | Done |
-| 2 | **Added SPA fallback** — `public/_redirects` with `/* /index.html 200` so client-side routes work on refresh | `public/_redirects` | Done |
-| 3 | **Fixed ReactionBar stale props** — added `useEffect` to sync when parent passes new reactions | `src/components/ReactionBar.tsx` | Done |
-| 4 | **Added file type validation on upload** — only JPEG, PNG, GIF, WebP, SVG accepted | `functions/api/media.ts` | Done |
-| 5 | **Fixed accounts UPSERT returning wrong ID** — re-reads row after upsert to return actual DB state | `functions/api/accounts.ts` | Done |
-| 6 | **Added CORS headers to 401/403 responses** — error responses now include `Access-Control-Allow-Origin` | `functions/api/_middleware.ts` | Done |
-| 7 | **Sanitized tag filter LIKE pattern** — strips `%`, `_`, `"`, `\` from user input | `functions/api/posts.ts` | Done |
-| 8 | **Separated users fetch from tag filter** — users fetched once on mount, posts re-fetched per tag change | `src/pages/Feed.tsx` | Done |
+### Deploy #1 — 2026-03-26 ~04:03 UTC
+
+**Status:** Deployed to <https://4a68c691.make100.pages.dev>
+
+**What was deployed:**
+
+- React frontend (Vite build)
+- Cloudflare Pages Functions (API at `/api/*`)
+- D1 database with schema migrated
+- R2 bucket created for media uploads
+- SPA `_redirects` for client-side routing
+
+**Pre-deploy fixes applied:**
+
+| # | Fix | File(s) |
+|---|-----|---------|
+| 1 | **Disabled `X-Dev-Email` in production** — dev auth header gated to localhost only | `functions/api/_middleware.ts` |
+| 2 | **Added SPA fallback** — `/* /index.html 200` | `public/_redirects` |
+| 3 | **Fixed ReactionBar stale props** — `useEffect` syncs when parent re-fetches | `src/components/ReactionBar.tsx` |
+| 4 | **Added file type validation on upload** — JPEG, PNG, GIF, WebP, SVG only | `functions/api/media.ts` |
+| 5 | **Fixed accounts UPSERT returning wrong ID** — re-reads row after upsert | `functions/api/accounts.ts` |
+| 6 | **Added CORS headers to 401/403 responses** | `functions/api/_middleware.ts` |
+| 7 | **Sanitized tag LIKE pattern** — strips `%`, `_`, `"`, `\` | `functions/api/posts.ts` |
+| 8 | **Separated users fetch from tag filter** — users fetched once on mount | `src/pages/Feed.tsx` |
+| 9 | **Fixed dead `@/types` import in github.ts** — inlined interface | `src/lib/github.ts` |
 
 ---
 
-## Deployment Steps
+## Post-Deploy: Still Needed
 
-### 1. Create Cloudflare Resources
-```bash
-# Create D1 database
-wrangler d1 create make100-db
-# Copy the database_id from the output and update wrangler.toml
+### Required for Production Use
 
-# Create R2 bucket
-wrangler r2 bucket create make100-media
-```
+1. **Configure Cloudflare Access**
+   - Go to Cloudflare Zero Trust dashboard
+   - Create an Access application for `m100.dev` (or `make100.pages.dev` for now)
+   - Add policy: allow emails matching `*@nyu.edu` and `*@itp.nyu.edu`
+   - Ensure the policy covers both the site and `/api/*` routes
 
-### 2. Update `wrangler.toml`
-Replace `database_id = "placeholder-create-with-wrangler-d1-create"` with the real UUID from step 1.
+2. **Set custom domain `m100.dev`**
+   - In Cloudflare Pages project settings → Custom domains → Add `m100.dev`
+   - Point DNS to Cloudflare
 
-### 3. Run Database Migration
-```bash
-npm run db:migrate
-# or: wrangler d1 execute make100-db --file=./schema.sql
-```
+### Nice to Have
 
-### 4. Build & Deploy
+- **JWT signature verification** — middleware decodes but doesn't verify the `CF-Access-Jwt-Assertion` signature. Currently relies on Access being the sole entry point.
+- **Markdown truncation** — `PostCard` slices at 400 chars, can break mid-syntax. Cosmetic.
+- **Dead code cleanup** — `src/lib/store.ts`, `src/lib/mock-data.ts`, `src/components/GitHubEmbed.tsx`, `src/types/index.ts` are unused legacy files.
+
+---
+
+## Redeployment
+
 ```bash
 npm run build
-wrangler pages deploy dist
+npx wrangler pages deploy dist --project-name=make100
 ```
 
-### 5. Configure Cloudflare Access
-1. Go to Cloudflare Zero Trust dashboard
-2. Create an Access application for `m100.dev`
-3. Add policy: allow emails matching `*@nyu.edu` and `*@itp.nyu.edu`
-4. Ensure the policy covers both the site and `/api/*` routes
+## Database Migration
 
-### 6. Set Custom Domain
-1. In Cloudflare Pages project settings, add `m100.dev` as custom domain
-2. Verify DNS is pointed correctly
-
----
-
-## Environment Variables
-
-| Var | Production | Dev |
-|-----|-----------|-----|
-| `ALLOWED_DOMAINS` | `nyu.edu,itp.nyu.edu` | `nyu.edu,itp.nyu.edu` |
-| `DEV_MODE` | *(not set)* | `true` |
-
----
-
-## Known Remaining Items
-
-- **JWT signature not verified** — middleware decodes but doesn't verify `CF-Access-Jwt-Assertion` signature. Relies on Cloudflare Access being the sole entry point. Consider adding signature verification against `https://<team>.cloudflareaccess.com/cdn-cgi/access/certs` for defense-in-depth.
-- **Markdown truncation** — `PostCard` slices content at 400 chars which can break mid-syntax. Low priority, cosmetic only.
-- **Dead code cleanup** — `src/lib/store.ts`, `src/lib/mock-data.ts`, `src/components/GitHubEmbed.tsx`, `src/types/index.ts` are from the mock-data era and no longer used. Safe to remove.
+```bash
+npx wrangler d1 execute make100-db --file=./schema.sql --remote
+```
