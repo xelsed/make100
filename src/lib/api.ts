@@ -77,7 +77,7 @@ export const api = {
     }),
 
   // Media upload
-  uploadMedia: async (file: File): Promise<{ url: string; key: string }> => {
+  uploadMedia: async (file: File): Promise<{ url: string; key: string; mediaType?: string }> => {
     const formData = new FormData();
     formData.append('file', file);
 
