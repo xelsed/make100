@@ -1,6 +1,15 @@
-# 100 Days in Making
+# make100 — m100.dev
 
-A clean, private blog for documenting daily experiments and builds. Features markdown posts, GitHub repo embeds, reactions, and comments.
+A private, multi-user daily experiment journal. Each person is their own admin for their 100-day projects, with email-domain gating, cross-platform content aggregation, and frictionless daily posting.
+
+## Architecture
+
+- **Frontend:** React 18 + TypeScript + Vite + TailwindCSS
+- **Backend:** Cloudflare Pages Functions (edge API)
+- **Database:** Cloudflare D1 (SQLite at the edge)
+- **File Storage:** Cloudflare R2 (image uploads)
+- **Auth:** Cloudflare Access (email-domain gating, e.g. `@nyu.edu`)
+- **Domain:** `m100.dev`
 
 ## Local Development
 
@@ -9,57 +18,82 @@ npm install
 npm run dev
 ```
 
-## Deploy to Netlify (with Password Protection)
+The dev server runs at `http://localhost:5173`. In development, API requests use a mock `X-Dev-Email: dev@nyu.edu` header for auth.
 
-### Option A: Deploy from this directory
+## Deploy to Cloudflare Pages
 
-1. Install the Netlify CLI: `npm install -g netlify-cli`
-2. Build the site: `npm run build`
-3. Deploy: `netlify deploy --prod --dir=dist`
-4. Follow the prompts to link or create a site
+### 1. Create Cloudflare resources
 
-### Option B: Connect a GitHub repo
+```bash
+# Create D1 database
+npx wrangler d1 create make100-db
+# Copy the database_id into wrangler.toml
 
-1. Push this project to a **private** GitHub repo
-2. Go to [app.netlify.com](https://app.netlify.com) → "Add new site" → "Import from Git"
-3. Connect your repo
-4. Build command: `npm run build`
-5. Publish directory: `dist`
-6. Deploy
+# Create R2 bucket
+npx wrangler r2 bucket create make100-media
 
-### Enable Password Protection
+# Run database migrations
+npx wrangler d1 execute make100-db --file=./schema.sql
+```
 
-1. Go to your Netlify site dashboard
-2. **Site configuration** → **Access & security** → **Visitor access**
-3. Set a **site-wide password**
-4. Share the password with people you trust
+### 2. Deploy
 
-Now anyone visiting your site will see a password prompt first.
+```bash
+npm run build
+npx wrangler pages deploy dist
+```
 
-### Alternative: Cloudflare Pages + Access (email-based)
+### 3. Configure Cloudflare Access (email-domain gating)
 
-If you want to restrict access to `@nyu.edu` emails instead of a shared password:
+1. Go to Cloudflare dashboard → **Zero Trust** → **Access** → **Applications**
+2. Add your Pages domain (`m100.dev` or `*.pages.dev`)
+3. Create a policy: **Allow** → **Emails ending in** → `nyu.edu`
+4. Users verify via a one-time email code — no passwords needed
 
-1. Deploy to Cloudflare Pages (similar git-based workflow)
-2. In Cloudflare dashboard → **Zero Trust** → **Access** → **Applications**
-3. Add your Pages domain
-4. Create a policy: **Allow** → **Emails ending in** → `@nyu.edu`
-5. Users verify via a one-time email code — no passwords needed
+### 4. Custom domain
 
-## Posting Workflow
+1. In Cloudflare Pages → your project → **Custom domains**
+2. Add `m100.dev`
+3. DNS records are configured automatically if your domain is on Cloudflare
 
-Currently, posts are stored in-memory with mock data. To add real persistence, you can:
+## Features
 
-1. **Add a backend** (Cloudflare D1, Supabase, etc.)
-2. **Use markdown files** — add `.md` files to a `posts/` directory and build a simple loader
-3. **Use the GitHub API** — store posts as issues or files in a repo
+- **Daily post editor** — markdown + write/preview toggle + day number selector
+- **Smart URL detection** — paste any URL and it auto-detects the platform:
+  - GitHub repos → rich card with language, stars, forks
+  - YouTube / Vimeo / Loom → inline video player
+  - Instagram / Twitter / TikTok / Discord / Are.na → platform-branded embed card
+  - Any other URL → Open Graph link preview
+- **Image upload** — drag-and-drop or click to upload, stored in R2
+- **Visibility control** — shared (all authenticated users) or private (only you)
+- **Reactions** — emoji reactions with toggle
+- **Comments** — threaded comments on each post
+- **Connected accounts** — link GitHub, Instagram, Discord, YouTube, Twitter, TikTok, Are.na
+- **Tag system** — filter posts by tag
+- **Progress bar** — visual N/100 days tracker
+- **Dark Workshop theme** — near-black background, coral/amber accents, glassmorphism cards
+- **Email-domain gating** — only `@nyu.edu` (configurable) can access
 
-## Tech Stack
+## API Endpoints
 
-- **React 18** + TypeScript
-- **Vite** for dev/build
-- **TailwindCSS** for styling
-- **React Router** for navigation
-- **React Markdown** for post rendering
-- **Lucide** for icons
-- **date-fns** for date formatting
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/api/me` | Current user profile |
+| PUT | `/api/me` | Update profile |
+| GET | `/api/users` | List all users |
+| GET | `/api/posts` | List posts (supports `?user_id`, `?tag`, `?cursor`, `?limit`) |
+| POST | `/api/posts` | Create post |
+| GET | `/api/posts/:id` | Get post with reactions + comments |
+| PUT | `/api/posts/:id` | Update own post |
+| DELETE | `/api/posts/:id` | Delete own post |
+| POST | `/api/posts/:id/reactions` | Toggle reaction |
+| GET | `/api/posts/:id/comments` | List comments |
+| POST | `/api/posts/:id/comments` | Add comment |
+| POST | `/api/media` | Upload file to R2 |
+| GET | `/api/accounts` | List connected accounts |
+| POST | `/api/accounts` | Add/update connected account |
+| DELETE | `/api/accounts?platform=x` | Remove connected account |
+
+## Database Schema
+
+See `schema.sql` for the full schema. Tables: `users`, `posts`, `reactions`, `comments`, `connected_accounts`.
