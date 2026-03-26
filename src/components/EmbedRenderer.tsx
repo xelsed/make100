@@ -4,7 +4,7 @@ import type { EmbedType } from '@/lib/url-detect';
 import { fetchRepoMetadata, getLanguageColor } from '@/lib/github';
 
 interface MediaBlock {
-  type: EmbedType | 'image' | 'code' | 'file';
+  type: EmbedType | 'image' | 'video' | 'code' | 'file';
   url: string;
   meta?: Record<string, any>;
   language?: string;
@@ -39,6 +39,8 @@ export default function EmbedRenderer({ block }: EmbedRendererProps) {
       return <SocialCard url={block.url} platform="Are.na" color="#8c8c8c" />;
     case 'image':
       return <ImageEmbed url={block.url} alt={block.alt} />;
+    case 'video':
+      return <VideoEmbed url={block.url} meta={block.meta} />;
     case 'code':
       return <CodeBlock language={block.language} content={block.content || ''} />;
     case 'link':
@@ -171,6 +173,28 @@ function ImageEmbed({ url, alt }: { url: string; alt?: string }) {
   return (
     <div className="rounded-xl overflow-hidden border border-white/10">
       <img src={url} alt={alt || 'Uploaded image'} className="w-full object-contain max-h-[500px] bg-black/50" loading="lazy" />
+    </div>
+  );
+}
+
+function VideoEmbed({ url, meta }: { url: string; meta?: Record<string, any> }) {
+  return (
+    <div className="rounded-xl overflow-hidden border border-white/[0.06] bg-black">
+      <video
+        src={url}
+        controls
+        preload="metadata"
+        className="w-full max-h-[500px]"
+        playsInline
+      >
+        Your browser does not support video playback.
+      </video>
+      {meta?.size && (
+        <div className="px-3 py-1.5 border-t border-white/[0.06] text-[10px] text-txt-muted flex items-center gap-2">
+          <Play className="w-3 h-3" />
+          <span>{(meta.size / (1024 * 1024)).toFixed(1)} MB</span>
+        </div>
+      )}
     </div>
   );
 }
