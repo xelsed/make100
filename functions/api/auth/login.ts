@@ -66,12 +66,17 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     if (!emailRes.ok) {
       const err = await emailRes.text();
       console.error('Resend error:', err);
-      return Response.json({ error: 'Failed to send email. Try again.' }, { status: 500 });
+      // Fallback: return link directly if email fails (Resend free tier only sends to account owner)
+      return Response.json({
+        ok: true,
+        message: 'Email delivery failed — use the link below instead.',
+        devLink: magicLink,
+      });
     }
 
     return Response.json({ ok: true, message: 'Magic link sent! Check your email.' });
   }
 
-  // No Resend key = dev mode — return the link directly
-  return Response.json({ ok: true, message: 'Magic link sent! Check your email.', devLink: magicLink });
+  // No Resend key — return the link directly
+  return Response.json({ ok: true, message: 'Use the link below to log in.', devLink: magicLink });
 };
