@@ -30,6 +30,7 @@ An AI coding assistant can scaffold, build, and deploy a functional website in u
 | 11:29 PM | 0:08 | **CODE LANDING!** 9 new files in `functions/` directory — full Cloudflare Pages Functions API backend. Also new `src/lib/api.ts` client. Backend includes: posts CRUD, comments, reactions, users, media upload, auth middleware. D1 database integration. |
 | 11:30 PM | 0:09 | New file: `src/lib/auth.tsx` (auth context). Source files now at 18 (was 16). 3 untracked files: `functions/api/media.ts`, `src/lib/api.ts`, `src/lib/auth.tsx`. |
 | 11:31 PM | 0:10 | New root files: `schema.sql` (D1 database schema) and `wrangler.toml` (Cloudflare Pages config). `tailwind.config.js` modified. Infrastructure taking shape. 29 min remaining. |
+| 11:32 PM | 0:11 | `src/App.tsx` now modified — frontend routing being rewired (likely integrating auth context). Modified files: `App.tsx`, `tailwind.config.js`. Untracked: `media.ts`, `api.ts`, `auth.tsx`. 28 min remaining. |
 
 ## Project State (as of 11:24 PM)
 
