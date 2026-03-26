@@ -110,7 +110,7 @@ export default function PostEditor() {
               max={100}
               value={dayNumber}
               onChange={e => setDayNumber(parseInt(e.target.value) || 1)}
-              className="w-16 input-field text-center text-sm font-bold text-brand-400"
+              className="w-16 input-field text-center text-sm font-bold text-lime font-mono"
             />
             <span className="text-xs text-gray-600">/ 100</span>
           </div>
@@ -119,7 +119,7 @@ export default function PostEditor() {
             onClick={() => setVisibility(v => v === 'shared' ? 'private' : 'shared')}
             className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-medium transition-colors ${visibility === 'shared'
               ? 'bg-success/10 text-success border border-success/20'
-              : 'bg-amber/10 text-amber border border-amber/20'
+              : 'bg-warm/10 text-warm border border-warm/20'
               }`}
           >
             {visibility === 'shared' ? <Globe className="w-3 h-3" /> : <Lock className="w-3 h-3" />}
@@ -170,7 +170,7 @@ export default function PostEditor() {
             </div>
           ) : (
             <div
-              className={`relative ${dragOver ? 'ring-2 ring-brand-500/50 ring-offset-2 ring-offset-[#0a0a0f]' : ''}`}
+              className={`relative ${dragOver ? 'ring-2 ring-lime/40 ring-offset-2 ring-offset-base' : ''}`}
               onDrop={handleDrop}
               onDragOver={handleDragOver}
               onDragLeave={() => setDragOver(false)}
@@ -184,8 +184,8 @@ export default function PostEditor() {
                 required
               />
               {dragOver && (
-                <div className="absolute inset-0 bg-brand-500/10 border-2 border-dashed border-brand-500/40 rounded-xl flex items-center justify-center pointer-events-none">
-                  <span className="text-brand-400 font-medium text-sm">Drop image here</span>
+                <div className="absolute inset-0 bg-lime/5 border-2 border-dashed border-lime/30 rounded-xl flex items-center justify-center pointer-events-none">
+                  <span className="text-lime font-medium text-sm">Drop image here</span>
                 </div>
               )}
             </div>
@@ -285,7 +285,7 @@ export default function PostEditor() {
 
         {/* Error */}
         {error && (
-          <div className="text-red-400 text-sm bg-red-900/20 border border-red-500/20 rounded-xl px-4 py-2">
+          <div className="text-danger text-sm bg-danger/10 border border-danger/20 rounded-xl px-4 py-3">
             {error}
           </div>
         )}

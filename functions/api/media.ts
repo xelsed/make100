@@ -13,6 +13,11 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     return Response.json({ error: 'No file provided' }, { status: 400 });
   }
 
+  const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml'];
+  if (!allowedTypes.includes(file.type)) {
+    return Response.json({ error: `File type ${file.type} not allowed. Accepted: JPEG, PNG, GIF, WebP, SVG` }, { status: 415 });
+  }
+
   const maxSize = 10 * 1024 * 1024; // 10MB
   if (file.size > maxSize) {
     return Response.json({ error: 'File too large (max 10MB)' }, { status: 413 });

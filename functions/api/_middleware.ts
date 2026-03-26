@@ -2,6 +2,7 @@ interface Env {
   DB: D1Database;
   MEDIA: R2Bucket;
   ALLOWED_DOMAINS: string;
+  DEV_MODE?: string;
 }
 
 interface CfAccessJWT {
@@ -58,8 +59,8 @@ export const onRequest: PagesFunction<Env>[] = [
     }
 
     // In development, allow a mock user via X-Dev-Email header
-    const devEmail = request.headers.get('X-Dev-Email');
     const cfJwt = request.headers.get('CF-Access-Jwt-Assertion');
+    const isDev = env.DEV_MODE === 'true';
 
     let email: string | null = null;
 
@@ -68,14 +69,17 @@ export const onRequest: PagesFunction<Env>[] = [
       if (jwt?.email) {
         email = jwt.email;
       }
-    } else if (devEmail) {
-      email = devEmail;
+    } else if (isDev) {
+      const devEmail = request.headers.get('X-Dev-Email');
+      if (devEmail) email = devEmail;
     }
+
+    const corsHeaders = { 'Access-Control-Allow-Origin': '*', 'Content-Type': 'application/json' };
 
     if (!email) {
       return new Response(JSON.stringify({ error: 'Unauthorized — no valid session' }), {
         status: 401,
-        headers: { 'Content-Type': 'application/json' },
+        headers: corsHeaders,
       });
     }
 
@@ -85,7 +89,7 @@ export const onRequest: PagesFunction<Env>[] = [
     if (!allowedDomains.includes(emailDomain)) {
       return new Response(JSON.stringify({ error: `Email domain @${emailDomain} is not allowed` }), {
         status: 403,
-        headers: { 'Content-Type': 'application/json' },
+        headers: corsHeaders,
       });
     }
 

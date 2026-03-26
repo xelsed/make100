@@ -74,18 +74,18 @@ function GitHubCard({ url, meta }: { url: string; meta?: Record<string, any> }) 
   }
 
   return (
-    <a href={url} target="_blank" rel="noopener noreferrer" className="block glass rounded-xl p-4 glass-hover group border-l-2 border-indigo/40">
+    <a href={url} target="_blank" rel="noopener noreferrer" className="block glass rounded-xl p-4 glass-hover group border-l-2 border-lime-dim">
       <div className="flex items-center gap-2 mb-1.5">
         <Github className="w-4 h-4 text-gray-400" />
-        <span className="text-indigo-light font-semibold text-sm truncate group-hover:text-indigo transition-colors">
+        <span className="text-lime font-semibold text-sm truncate group-hover:text-lime-bright transition-colors">
           {repo.fullName || repo.full_name}
         </span>
         <ExternalLink className="w-3 h-3 text-gray-600 opacity-0 group-hover:opacity-100 transition-opacity" />
       </div>
       {repo.description && (
-        <p className="text-gray-400 text-xs leading-relaxed line-clamp-2 mb-2">{repo.description}</p>
+        <p className="text-txt-secondary text-xs leading-relaxed line-clamp-2 mb-2">{repo.description}</p>
       )}
-      <div className="flex items-center gap-3 text-xs text-gray-500">
+      <div className="flex items-center gap-3 text-xs text-txt-muted">
         {repo.language && (
           <span className="flex items-center gap-1">
             <span className="w-2.5 h-2.5 rounded-full inline-block" style={{ backgroundColor: getLanguageColor(repo.language) }} />
@@ -177,7 +177,7 @@ function ImageEmbed({ url, alt }: { url: string; alt?: string }) {
 
 function CodeBlock({ language, content }: { language?: string; content: string }) {
   return (
-    <div className="rounded-xl overflow-hidden border border-white/10 bg-[#0d0d14]">
+    <div className="rounded-xl overflow-hidden border border-white/[0.06] bg-base">
       {language && (
         <div className="px-4 py-1.5 border-b border-white/5 text-xs text-gray-500 font-mono">{language}</div>
       )}
@@ -193,7 +193,7 @@ function GenericLink({ url, meta }: { url: string; meta?: Record<string, any> })
     <a href={url} target="_blank" rel="noopener noreferrer" className="block glass rounded-xl p-4 glass-hover group border-l-2 border-gray-700">
       <div className="flex items-center gap-2">
         <LinkIcon className="w-4 h-4 text-gray-400" />
-        <span className="text-brand-400 font-medium text-sm truncate group-hover:text-brand-300 transition-colors">
+        <span className="text-accent-secondary font-medium text-sm truncate group-hover:text-lime transition-colors">
           {meta?.title || (() => { try { return new URL(url).hostname; } catch { return url; } })()}
         </span>
         <ExternalLink className="w-3 h-3 text-gray-600 opacity-0 group-hover:opacity-100 transition-opacity" />

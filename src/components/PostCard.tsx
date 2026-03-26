@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { MessageCircle, Calendar, Hash, Globe, Lock } from 'lucide-react';
+import { MessageCircle, Calendar, Hash, Lock } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -33,23 +33,23 @@ export default function PostCard({ post, compact = false }: PostCardProps) {
         <UserAvatar user={user} showOnline={false} />
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
-            <span className="font-semibold text-sm text-gray-100">{user.name}</span>
-            <span className="text-gray-600 text-xs">·</span>
-            <span className="text-gray-500 text-xs">
+            <span className="font-semibold text-sm text-txt">{user.name}</span>
+            <span className="text-txt-muted text-xs">·</span>
+            <span className="text-txt-secondary text-xs">
               {formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}
             </span>
           </div>
-          <div className="flex items-center gap-1.5 text-xs text-gray-500">
+          <div className="flex items-center gap-1.5 text-xs text-txt-muted">
             <Calendar className="w-3 h-3" />
-            <span>Day {post.day_number}</span>
-            {post.visibility === 'private' && <Lock className="w-3 h-3 ml-1 text-amber" />}
+            <span className="text-lime font-mono font-semibold">Day {post.day_number}</span>
+            {post.visibility === 'private' && <Lock className="w-3 h-3 ml-1 text-warm" />}
           </div>
         </div>
       </div>
 
       {/* Title */}
       <Link to={`/post/${post.id}`} className="block group mb-3">
-        <h2 className="text-lg font-bold text-gray-50 group-hover:text-brand-400 transition-colors">
+        <h2 className="text-lg font-bold text-txt group-hover:text-lime transition-colors">
           {post.title}
         </h2>
       </Link>
@@ -96,7 +96,7 @@ export default function PostCard({ post, compact = false }: PostCardProps) {
       )}
 
       {/* Footer */}
-      <div className="flex items-center justify-between pt-3 border-t border-white/5">
+      <div className="flex items-center justify-between pt-4 border-t border-white/[0.06]">
         <ReactionBar postId={post.id} reactions={reactions} />
         <Link
           to={`/post/${post.id}`}

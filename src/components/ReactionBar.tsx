@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { SmilePlus } from 'lucide-react';
 import { api } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
@@ -13,6 +13,10 @@ interface ReactionBarProps {
 export default function ReactionBar({ postId, reactions: initialReactions }: ReactionBarProps) {
   const [showPicker, setShowPicker] = useState(false);
   const [reactions, setReactions] = useState(initialReactions);
+
+  useEffect(() => {
+    setReactions(initialReactions);
+  }, [initialReactions]);
   const { user } = useAuth();
 
   const grouped = reactions.reduce<Record<string, { count: number; hasOwn: boolean }>>((acc, r) => {
@@ -41,8 +45,8 @@ export default function ReactionBar({ postId, reactions: initialReactions }: Rea
           key={emoji}
           onClick={() => toggleReaction(emoji)}
           className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs transition-all duration-150 ${hasOwn
-              ? 'bg-brand-600/30 border border-brand-500/40 text-brand-300'
-              : 'bg-white/5 border border-white/10 text-gray-400 hover:bg-white/10'
+            ? 'bg-lime/15 border border-lime/25 text-lime'
+            : 'bg-surface-raised border border-white/[0.06] text-txt-secondary hover:border-lime/20'
             }`}
         >
           <span>{emoji}</span>

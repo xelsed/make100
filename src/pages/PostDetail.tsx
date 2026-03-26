@@ -79,20 +79,20 @@ export default function PostDetail() {
         <div className="flex items-center gap-3 mb-5">
           <UserAvatar user={user} size="lg" showOnline={false} />
           <div>
-            <span className="font-semibold text-gray-100">{user.name}</span>
-            <div className="flex items-center gap-2 text-xs text-gray-500">
+            <span className="font-semibold text-txt">{user.name}</span>
+            <div className="flex items-center gap-2 text-xs text-txt-secondary">
               <span className="flex items-center gap-1">
                 <Calendar className="w-3 h-3" />
                 Day {post.day_number}
               </span>
               <span>·</span>
               <span>{formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}</span>
-              {post.visibility === 'private' && <Lock className="w-3 h-3 text-amber" />}
+              {post.visibility === 'private' && <Lock className="w-3 h-3 text-warm" />}
             </div>
           </div>
         </div>
 
-        <h1 className="text-2xl font-extrabold text-gray-50 mb-6">{post.title}</h1>
+        <h1 className="text-2xl font-extrabold text-txt mb-6">{post.title}</h1>
 
         <div className="markdown-body mb-6">
           <ReactMarkdown remarkPlugins={[remarkGfm]}>{post.content}</ReactMarkdown>
@@ -117,13 +117,13 @@ export default function PostDetail() {
           </div>
         )}
 
-        <div className="pt-4 border-t border-white/5">
+        <div className="pt-4 border-t border-white/[0.06]">
           <ReactionBar postId={post.id} reactions={reactions} />
         </div>
       </article>
 
       <div className="glass rounded-2xl p-6">
-        <h3 className="font-semibold text-sm text-gray-300 mb-4">
+        <h3 className="font-semibold text-sm text-txt mb-4">
           Comments ({comments.length})
         </h3>
 
@@ -134,14 +134,14 @@ export default function PostDetail() {
                 <UserAvatar user={comment.user || { name: comment.user_name || 'Unknown' }} size="sm" />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-0.5">
-                    <span className="text-sm font-medium text-gray-200">
+                    <span className="text-sm font-medium text-txt">
                       {comment.user?.name || comment.user_name || 'Unknown'}
                     </span>
-                    <span className="text-xs text-gray-600">
+                    <span className="text-xs text-txt-muted">
                       {formatDistanceToNow(new Date(comment.created_at), { addSuffix: true })}
                     </span>
                   </div>
-                  <p className="text-sm text-gray-400 leading-relaxed">{comment.content}</p>
+                  <p className="text-sm text-txt-secondary leading-relaxed">{comment.content}</p>
                 </div>
               </div>
             ))}
