@@ -1,0 +1,15 @@
+name = "make100"
+compatibility_date = "2024-09-23"
+pages_build_output_dir = "dist"
+
+[vars]
+ALLOWED_DOMAINS = "nyu.edu,itp.nyu.edu"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "make100-db"
+database_id = "placeholder-create-with-wrangler-d1-create"
+
+[[r2_buckets]]
+binding = "MEDIA"
+bucket_name = "make100-media"
