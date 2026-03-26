@@ -1,28 +1,30 @@
-import { useState } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Send, Plus, X, Github, Eye, Edit3 } from 'lucide-react';
+import { Send, Plus, X, Link as LinkIcon, Eye, Edit3, Upload, Globe, Lock } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { addPost } from '@/lib/store';
-import { fetchRepoMetadata } from '@/lib/github';
-import { getCurrentUser } from '@/lib/store';
-import { MOCK_POSTS } from '@/lib/mock-data';
-import type { GitHubRepo } from '@/types';
-import GitHubEmbed from './GitHubEmbed';
+import { api } from '@/lib/api';
+import { useAuth } from '@/lib/auth';
+import { detectUrl, isUrl, embedTypeLabel } from '@/lib/url-detect';
+import EmbedRenderer, { type MediaBlock } from './EmbedRenderer';
 
 export default function PostEditor() {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const [dayNumber, setDayNumber] = useState(1);
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState('');
-  const [repos, setRepos] = useState<GitHubRepo[]>([]);
-  const [repoUrl, setRepoUrl] = useState('');
-  const [repoLoading, setRepoLoading] = useState(false);
+  const [media, setMedia] = useState<MediaBlock[]>([]);
+  const [linkInput, setLinkInput] = useState('');
+  const [linkLoading, setLinkLoading] = useState(false);
   const [preview, setPreview] = useState(false);
+  const [visibility, setVisibility] = useState<'shared' | 'private'>('shared');
   const [submitting, setSubmitting] = useState(false);
-
-  const nextDay = Math.max(...MOCK_POSTS.map(p => p.dayNumber), 0) + 1;
+  const [error, setError] = useState<string | null>(null);
+  const [dragOver, setDragOver] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   function handleAddTag(e: React.KeyboardEvent) {
     if (e.key === 'Enter' && tagInput.trim()) {
@@ -35,42 +37,94 @@ export default function PostEditor() {
     }
   }
 
-  async function handleAddRepo() {
-    if (!repoUrl.trim()) return;
-    setRepoLoading(true);
-    const meta = await fetchRepoMetadata(repoUrl);
-    if (meta) {
-      setRepos([...repos, meta]);
-      setRepoUrl('');
-    }
-    setRepoLoading(false);
+  async function handleAddLink() {
+    const input = linkInput.trim();
+    if (!input || !isUrl(input)) return;
+    setLinkLoading(true);
+    const detected = detectUrl(input);
+    setMedia([...media, { type: detected.type, url: detected.url, meta: detected.meta }]);
+    setLinkInput('');
+    setLinkLoading(false);
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleImageUpload(files: FileList | null) {
+    if (!files) return;
+    for (const file of Array.from(files)) {
+      if (!file.type.startsWith('image/')) continue;
+      try {
+        const result = await api.uploadMedia(file);
+        setMedia(prev => [...prev, { type: 'image', url: result.url, alt: file.name }]);
+      } catch {
+        setError('Image upload failed');
+      }
+    }
+  }
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setDragOver(false);
+    handleImageUpload(e.dataTransfer.files);
+  }, []);
+
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setDragOver(true);
+  }, []);
+
+  function removeMedia(index: number) {
+    setMedia(media.filter((_, i) => i !== index));
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!title.trim() || !content.trim()) return;
     setSubmitting(true);
+    setError(null);
 
-    addPost({
-      userId: getCurrentUser().id,
-      dayNumber: nextDay,
-      title: title.trim(),
-      content: content.trim(),
-      tags,
-      repos,
-    });
-
-    setTimeout(() => navigate('/'), 300);
+    try {
+      const post = await api.createPost({
+        title: title.trim(),
+        content: content.trim(),
+        day_number: dayNumber,
+        tags,
+        media,
+        visibility,
+      });
+      navigate(`/post/${post.id}`);
+    } catch (err: any) {
+      setError(err.message);
+      setSubmitting(false);
+    }
   }
 
   return (
     <form onSubmit={handleSubmit} className="max-w-2xl mx-auto">
       <div className="glass rounded-2xl p-6 space-y-5">
-        {/* Day badge */}
-        <div className="flex items-center gap-3">
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-600/20 border border-brand-500/30 text-brand-300 text-sm font-semibold">
-            Day {nextDay}
-          </span>
+        {/* Day number + visibility */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-medium text-gray-500">Day</span>
+            <input
+              type="number"
+              min={1}
+              max={100}
+              value={dayNumber}
+              onChange={e => setDayNumber(parseInt(e.target.value) || 1)}
+              className="w-16 input-field text-center text-sm font-bold text-brand-400"
+            />
+            <span className="text-xs text-gray-600">/ 100</span>
+          </div>
+          <button
+            type="button"
+            onClick={() => setVisibility(v => v === 'shared' ? 'private' : 'shared')}
+            className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-medium transition-colors ${visibility === 'shared'
+                ? 'bg-success/10 text-success border border-success/20'
+                : 'bg-amber/10 text-amber border border-amber/20'
+              }`}
+          >
+            {visibility === 'shared' ? <Globe className="w-3 h-3" /> : <Lock className="w-3 h-3" />}
+            {visibility === 'shared' ? 'Shared' : 'Private'}
+          </button>
         </div>
 
         {/* Title */}
@@ -83,15 +137,14 @@ export default function PostEditor() {
           required
         />
 
-        {/* Content editor / preview toggle */}
+        {/* Write / Preview toggle */}
         <div>
           <div className="flex items-center gap-2 mb-2">
             <button
               type="button"
               onClick={() => setPreview(false)}
-              className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-medium transition-colors ${
-                !preview ? 'bg-white/10 text-white' : 'text-gray-500 hover:text-gray-300'
-              }`}
+              className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-medium transition-colors ${!preview ? 'bg-white/10 text-white' : 'text-gray-500 hover:text-gray-300'
+                }`}
             >
               <Edit3 className="w-3 h-3" />
               Write
@@ -99,9 +152,8 @@ export default function PostEditor() {
             <button
               type="button"
               onClick={() => setPreview(true)}
-              className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-medium transition-colors ${
-                preview ? 'bg-white/10 text-white' : 'text-gray-500 hover:text-gray-300'
-              }`}
+              className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-medium transition-colors ${preview ? 'bg-white/10 text-white' : 'text-gray-500 hover:text-gray-300'
+                }`}
             >
               <Eye className="w-3 h-3" />
               Preview
@@ -117,15 +169,95 @@ export default function PostEditor() {
               )}
             </div>
           ) : (
-            <textarea
-              value={content}
-              onChange={e => setContent(e.target.value)}
-              placeholder="Write about your experiment... (Markdown supported)"
-              rows={12}
-              className="input-field w-full font-mono text-sm resize-y"
-              required
-            />
+            <div
+              className={`relative ${dragOver ? 'ring-2 ring-brand-500/50 ring-offset-2 ring-offset-[#0a0a0f]' : ''}`}
+              onDrop={handleDrop}
+              onDragOver={handleDragOver}
+              onDragLeave={() => setDragOver(false)}
+            >
+              <textarea
+                value={content}
+                onChange={e => setContent(e.target.value)}
+                placeholder="Write about your experiment... (Markdown supported, drag images here)"
+                rows={12}
+                className="input-field w-full font-mono text-sm resize-y"
+                required
+              />
+              {dragOver && (
+                <div className="absolute inset-0 bg-brand-500/10 border-2 border-dashed border-brand-500/40 rounded-xl flex items-center justify-center pointer-events-none">
+                  <span className="text-brand-400 font-medium text-sm">Drop image here</span>
+                </div>
+              )}
+            </div>
           )}
+        </div>
+
+        {/* Media blocks */}
+        {media.length > 0 && (
+          <div className="space-y-2">
+            <label className="text-xs font-medium text-gray-400">Attached Media</label>
+            {media.map((block, i) => (
+              <div key={i} className="relative group">
+                <EmbedRenderer block={block} />
+                <button
+                  type="button"
+                  onClick={() => removeMedia(i)}
+                  className="absolute top-2 right-2 p-1 rounded-full bg-gray-900/80 hover:bg-red-900/50 text-gray-400 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100"
+                  title="Remove"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Add link / image */}
+        <div className="space-y-2">
+          <label className="text-xs font-medium text-gray-400">Add Link or Image</label>
+          <div className="flex gap-2">
+            <div className="relative flex-1">
+              <LinkIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+              <input
+                type="text"
+                value={linkInput}
+                onChange={e => setLinkInput(e.target.value)}
+                placeholder="Paste any URL (GitHub, YouTube, Instagram, Discord...)"
+                className="input-field w-full pl-9 text-sm"
+                onKeyDown={e => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleAddLink();
+                  }
+                }}
+              />
+            </div>
+            <button
+              type="button"
+              onClick={handleAddLink}
+              disabled={linkLoading || !linkInput.trim()}
+              className="btn-ghost flex items-center gap-1.5 text-sm disabled:opacity-40"
+            >
+              <Plus className="w-4 h-4" />
+              Add
+            </button>
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="btn-ghost flex items-center gap-1.5 text-sm"
+              title="Upload image"
+            >
+              <Upload className="w-4 h-4" />
+            </button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              multiple
+              className="hidden"
+              onChange={e => handleImageUpload(e.target.files)}
+            />
+          </div>
         </div>
 
         {/* Tags */}
@@ -135,7 +267,7 @@ export default function PostEditor() {
             {tags.map(tag => (
               <span key={tag} className="tag">
                 #{tag}
-                <button type="button" onClick={() => setTags(tags.filter(t => t !== tag))}>
+                <button type="button" onClick={() => setTags(tags.filter(t => t !== tag))} title="Remove tag">
                   <X className="w-2.5 h-2.5" />
                 </button>
               </span>
@@ -151,51 +283,12 @@ export default function PostEditor() {
           </div>
         </div>
 
-        {/* GitHub Repos */}
-        <div>
-          <label className="text-xs font-medium text-gray-400 mb-1.5 block">Linked Repos</label>
-          <div className="space-y-2 mb-2">
-            {repos.map(repo => (
-              <div key={repo.url} className="relative">
-                <GitHubEmbed repo={repo} />
-                <button
-                  type="button"
-                  onClick={() => setRepos(repos.filter(r => r.url !== repo.url))}
-                  className="absolute top-2 right-2 p-1 rounded-full bg-gray-900/80 hover:bg-red-900/50 text-gray-400 hover:text-red-400 transition-colors"
-                >
-                  <X className="w-3 h-3" />
-                </button>
-              </div>
-            ))}
+        {/* Error */}
+        {error && (
+          <div className="text-red-400 text-sm bg-red-900/20 border border-red-500/20 rounded-xl px-4 py-2">
+            {error}
           </div>
-          <div className="flex gap-2">
-            <div className="relative flex-1">
-              <Github className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
-              <input
-                type="text"
-                value={repoUrl}
-                onChange={e => setRepoUrl(e.target.value)}
-                placeholder="https://github.com/user/repo"
-                className="input-field w-full pl-9 text-sm"
-                onKeyDown={e => {
-                  if (e.key === 'Enter') {
-                    e.preventDefault();
-                    handleAddRepo();
-                  }
-                }}
-              />
-            </div>
-            <button
-              type="button"
-              onClick={handleAddRepo}
-              disabled={repoLoading || !repoUrl.trim()}
-              className="btn-ghost flex items-center gap-1.5 text-sm disabled:opacity-40"
-            >
-              <Plus className="w-4 h-4" />
-              {repoLoading ? 'Loading...' : 'Add'}
-            </button>
-          </div>
-        </div>
+        )}
 
         {/* Submit */}
         <div className="flex justify-end pt-2">
