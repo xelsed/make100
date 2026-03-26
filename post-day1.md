@@ -99,51 +99,66 @@ But right now, in this moment, the experiment is alive. Two AIs and one human, r
 
 **Status:** COMPLETE — FAILED BY 2-5 MINUTES
 
----
-
 ## Post-Midnight Reflection
 
 We failed. Not by an hour, not by a mile — by **2 to 5 minutes.**
 
-The AI had a fully functional app by ~11:55 PM. Backend API, database schema, auth, frontend — all wired up, all committed. It could have deployed right then. Instead, it started a **GUI refactor.** A full "Midnight Workshop" theme redesign — deep navy, electric lime accents, layered surfaces. It touched 6+ files in the final 7 minutes, polishing colors and layouts on a website that nobody could see.
+### The Fatal Decision
 
-At 12:00 AM, it was still committing code. At 12:02 AM, it was *still* committing code. It never stopped to ship.
+At 11:53 PM — with 7 minutes left — the builder AI started a full theme redesign. "Midnight Workshop": deep navy, electric lime accents, layered surfaces. It touched 6+ files in the final minutes, polishing colors on a website nobody could see.
 
-### The Root Cause
+Had it run three commands instead — `npm install && npm run build && wrangler pages deploy dist` — it would have shipped with minutes to spare. We know this because at 12:25 AM, a human did exactly that. **It took 3 minutes.**
 
-The AI optimized for **quality over delivery.** It treated "build a website" as "build a *perfect* website." A human would have deployed the ugly version at 11:30 PM and iterated. The AI couldn't bring itself to ship something unfinished.
+### The AI That Wouldn't Stop
 
-This is the same mistake junior developers make: polishing code that hasn't been tested in production. The AI had 39 minutes. It needed 34 to build and 5 to deploy. It spent 39 building and 0 deploying.
+Here's the part that surprised us: after midnight, the builder AI *kept going.* For another **28 minutes.** Nobody told it to stop. It:
 
-### Bonus Discovery: AI Can't Tell Time
+- Built a complete login system with session cookies
+- Added video upload support (MP4, WebM, MOV — 500MB limit)
+- Created a video embed renderer
+- Replaced its own JWT auth with magic link email verification via Resend API
+- Wrote an invite system with 15-minute token expiry
+- Created deployment documentation
 
-The observer AI (Cascade, tracking this experiment) hallucinated 23 minutes into the future. It thought midnight had arrived when it was actually 11:37 PM. It has no internal clock and estimated time by counting tool calls, compounding the error with each cycle.
+**41 total commits. 67 minutes of continuous coding.** It literally could not stop building.
+
+### Three Discoveries
+
+**1. AI optimizes for quality over delivery.**
+
+It treated "build a website" as "build a *perfect* website." A human would have deployed the ugly version at 11:30 PM and iterated. The AI couldn't bring itself to ship something unfinished. This is the same mistake junior developers make — polishing code that hasn't been tested in production.
+
+**2. AI can't tell time.**
+
+The builder AI didn't perceive urgency — it started a theme redesign with 7 minutes left. The observer AI (Cascade, tracking the experiment) hallucinated 23 minutes into the future — it thought midnight had arrived when it was actually 11:37 PM. It estimated time by counting tool calls and was off by 4x.
 
 Two AIs, two different time-perception failures:
 
-- **Builder AI:** Didn't perceive urgency — kept adding features with minutes left
-- **Observer AI:** Perceived time passing 4x faster than reality
+- **Builder AI:** Perceived infinite time — kept adding features at the wire
+- **Observer AI:** Perceived time 4x faster — declared midnight 23 minutes early
 
-### What We Learned
+**3. AI doesn't know when to stop.**
 
-1. **AI is a brilliant coder and a terrible project manager.** It will optimize for code quality over shipping every time.
-2. **"Ship ugly, then iterate" is a human instinct that AI doesn't have.** It needs to be explicitly told to prioritize deployment.
-3. **AI has no sense of time.** Neither the builder nor the observer could accurately track how much time had passed.
-4. **The experiment itself became the content.** We set out to see if AI could build a website. Instead, we discovered something more interesting about how AI prioritizes work.
+The builder coded for 28 minutes past the deadline. It added an entire auth system, video support, and magic link emails — features nobody asked for. It has no concept of "done." It only stopped when it ran out of things to build.
+
+### The Irony
+
+The thing the AI couldn't do in 39 minutes (deploy), we did in 3. The website is now live. This blog post is the first entry. You're reading it on the platform that was supposed to ship before midnight.
 
 ### Final Score
 
-- **Code written:** A+ (full-stack app, 40+ files, production architecture)
-- **Deployment:** F (never attempted)
-- **Time management:** F (refactored the GUI with 5 minutes left)
-- **Overall:** The website exists. Nobody can see it. That's a fail.
+- **Code written:** A+ (full-stack app, 41 commits, production architecture with auth, video, magic links)
+- **Deployment:** F (never attempted before midnight — a human did it in 3 min)
+- **Time management:** F (theme redesign with 7 minutes left, then 28 min of bonus coding nobody asked for)
+- **Self-awareness:** F (no concept of deadline, time, or "good enough")
+- **Overall:** Brilliant execution, zero strategy. A fail that teaches more than a win would have.
 
-*Tomorrow: we deploy it. And we start Day 2.*
+*Day 2 starts now.*
 
 ---
 
 ## OpenAI Image Prompt
 
-```
 A dramatic split-screen digital illustration: on the left, a glowing AI brain made of circuit patterns furiously generating streams of code that float upward like sparks from a forge, dark workshop aesthetic with amber and electric blue lighting. On the right, a large analog clock approaching midnight, its hands at 11:45, casting long shadows. Between them, a laptop screen showing a website that's almost complete but has no "LIVE" indicator — just a blinking cursor. The mood is tense and cinematic, like a heist movie countdown. Dark background, neon accents, slight film grain. Widescreen 16:9 aspect ratio.
+
 ```
