@@ -16,6 +16,8 @@ interface AuthContextType {
   user: User | null;
   loading: boolean;
   error: string | null;
+  login: (email: string) => Promise<{ ok: boolean; error?: string }>;
+  logout: () => Promise<void>;
   refresh: () => Promise<void>;
 }
 
@@ -23,7 +25,9 @@ const AuthContext = createContext<AuthContextType>({
   user: null,
   loading: true,
   error: null,
-  refresh: async () => {},
+  login: async () => ({ ok: false }),
+  logout: async () => { },
+  refresh: async () => { },
 });
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -37,12 +41,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setError(null);
       const me = await api.getMe();
       setUser(me);
-    } catch (e: any) {
-      setError(e.message);
+    } catch {
       setUser(null);
     } finally {
       setLoading(false);
     }
+  };
+
+  const login = async (email: string): Promise<{ ok: boolean; error?: string }> => {
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+      const data = await res.json();
+      if (!res.ok) return { ok: false, error: data.error || 'Login failed' };
+      await refresh();
+      return { ok: true };
+    } catch {
+      return { ok: false, error: 'Network error' };
+    }
+  };
+
+  const logout = async () => {
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' });
+    } catch { }
+    setUser(null);
   };
 
   useEffect(() => {
@@ -50,7 +76,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, loading, error, refresh }}>
+    <AuthContext.Provider value={{ user, loading, error, login, logout, refresh }}>
       {children}
     </AuthContext.Provider>
   );

@@ -5,7 +5,7 @@
 - **URL:** <https://make100.pages.dev>
 - **Preview:** <https://4a68c691.make100.pages.dev>
 - **Platform:** Cloudflare Pages + Functions
-- **Domain:** m100.dev *(custom domain not yet configured)*
+- **Domain:** m100.dev ✅
 - **Database:** Cloudflare D1 — `make100-db` (`0dc70598-cff5-4ceb-82b5-b7344590b9e9`)
 - **Storage:** Cloudflare R2 — `make100-media`
 - **Auth:** Cloudflare Access *(not yet configured — see step 5 below)*

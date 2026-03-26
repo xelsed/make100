@@ -2,106 +2,130 @@ interface Env {
   DB: D1Database;
   MEDIA: R2Bucket;
   ALLOWED_DOMAINS: string;
-
+  SESSION_SECRET?: string;
 }
 
-interface CfAccessJWT {
-  email: string;
-  sub: string;
-  iat: number;
-  exp: number;
+function parseCookie(cookieHeader: string, name: string): string | null {
+  const match = cookieHeader.match(new RegExp(`(?:^|;\\s*)${name}=([^;]*)`));
+  return match ? match[1] : null;
 }
 
-function parseJwt(token: string): CfAccessJWT | null {
+function decodeJwt(token: string): Record<string, any> | null {
   try {
     const parts = token.split('.');
     if (parts.length !== 3) return null;
-    const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
-    return payload as CfAccessJWT;
+    return JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
   } catch {
     return null;
   }
 }
 
-function generateId(): string {
-  return crypto.randomUUID();
-}
+async function verifyToken(token: string, secret: string): Promise<Record<string, any> | null> {
+  const parts = token.split('.');
+  if (parts.length !== 3) return null;
 
-async function upsertUser(db: D1Database, email: string): Promise<{ id: string; email: string; name: string }> {
-  const existing = await db.prepare('SELECT id, email, name FROM users WHERE email = ?').bind(email).first();
-  if (existing) {
-    return existing as { id: string; email: string; name: string };
-  }
+  const encoder = new TextEncoder();
+  const key = await crypto.subtle.importKey(
+    'raw', encoder.encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['verify']
+  );
 
-  const id = generateId();
-  const name = email.split('@')[0];
-  await db.prepare(
-    'INSERT INTO users (id, email, name) VALUES (?, ?, ?)'
-  ).bind(id, email, name).run();
+  const sigBytes = Uint8Array.from(atob(parts[2].replace(/-/g, '+').replace(/_/g, '/')), c => c.charCodeAt(0));
+  const valid = await crypto.subtle.verify('HMAC', key, sigBytes, encoder.encode(`${parts[0]}.${parts[1]}`));
 
-  return { id, email, name };
+  if (!valid) return null;
+
+  const payload = decodeJwt(token);
+  if (!payload) return null;
+  if (payload.exp && payload.exp < Math.floor(Date.now() / 1000)) return null;
+
+  return payload;
 }
 
 export const onRequest: PagesFunction<Env>[] = [
   async (context) => {
     const { request, env, data } = context;
+    const url = new URL(request.url);
 
-    // CORS headers for all API routes
+    // CORS preflight
     if (request.method === 'OPTIONS') {
       return new Response(null, {
         headers: {
           'Access-Control-Allow-Origin': '*',
           'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-          'Access-Control-Allow-Headers': 'Content-Type, Authorization, CF-Access-Jwt-Assertion',
+          'Access-Control-Allow-Headers': 'Content-Type, X-Dev-Email',
           'Access-Control-Max-Age': '86400',
         },
       });
     }
 
-    // In development, allow a mock user via X-Dev-Email header
-    const cfJwt = request.headers.get('CF-Access-Jwt-Assertion');
-    const url = new URL(request.url);
+    // Auth routes are public (login, logout)
+    if (url.pathname.startsWith('/api/auth/')) {
+      const response = await context.next();
+      const newResponse = new Response(response.body, response);
+      newResponse.headers.set('Access-Control-Allow-Origin', '*');
+      return newResponse;
+    }
+
+    // --- Resolve session ---
+    const secret = env.SESSION_SECRET || 'make100-dev-secret-change-me';
     const isDev = url.hostname === 'localhost' || url.hostname === '127.0.0.1';
-
+    let userId: string | null = null;
     let email: string | null = null;
+    let userName: string | null = null;
 
-    if (cfJwt) {
-      const jwt = parseJwt(cfJwt);
-      if (jwt?.email) {
-        email = jwt.email;
+    // 1. Check session cookie
+    const cookies = request.headers.get('Cookie') || '';
+    const sessionToken = parseCookie(cookies, 'm100_session');
+    if (sessionToken) {
+      const payload = await verifyToken(sessionToken, secret);
+      if (payload) {
+        userId = payload.sub;
+        email = payload.email;
+        userName = payload.name;
       }
-    } else if (isDev) {
+    }
+
+    // 2. Dev mode fallback
+    if (!email && isDev) {
       const devEmail = request.headers.get('X-Dev-Email');
       if (devEmail) email = devEmail;
     }
 
-    const corsHeaders = { 'Access-Control-Allow-Origin': '*', 'Content-Type': 'application/json' };
-
+    // No session found
     if (!email) {
-      return new Response(JSON.stringify({ error: 'Unauthorized — no valid session' }), {
+      return new Response(JSON.stringify({ error: 'Not logged in' }), {
         status: 401,
-        headers: corsHeaders,
+        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
       });
     }
 
-    // Check email domain
-    const allowedDomains = (env.ALLOWED_DOMAINS || 'nyu.edu').split(',').map(d => d.trim());
-    const emailDomain = email.split('@')[1];
-    if (!allowedDomains.includes(emailDomain)) {
-      return new Response(JSON.stringify({ error: `Email domain @${emailDomain} is not allowed` }), {
-        status: 403,
-        headers: corsHeaders,
-      });
+    // Look up or create user
+    let user: { id: string; email: string; name: string };
+    if (userId) {
+      const existing = await env.DB.prepare('SELECT id, email, name FROM users WHERE id = ?').bind(userId).first();
+      if (existing) {
+        user = existing as any;
+      } else {
+        return new Response(JSON.stringify({ error: 'Session invalid' }), {
+          status: 401,
+          headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+        });
+      }
+    } else {
+      // Dev mode: upsert by email
+      let existing = await env.DB.prepare('SELECT id, email, name FROM users WHERE email = ?').bind(email).first();
+      if (!existing) {
+        const id = crypto.randomUUID();
+        const name = email.split('@')[0];
+        await env.DB.prepare('INSERT INTO users (id, email, name) VALUES (?, ?, ?)').bind(id, email, name).run();
+        existing = { id, email, name };
+      }
+      user = existing as any;
     }
 
-    // Upsert user and attach to context
-    const user = await upsertUser(env.DB, email);
     (data as any).user = user;
 
-    // Continue to the actual route handler
     const response = await context.next();
-
-    // Add CORS headers to response
     const newResponse = new Response(response.body, response);
     newResponse.headers.set('Access-Control-Allow-Origin', '*');
     return newResponse;
