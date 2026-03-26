@@ -1,4 +1,13 @@
-import type { GitHubRepo } from '@/types';
+interface GitHubRepo {
+  url: string;
+  name: string;
+  fullName: string;
+  description: string;
+  language: string;
+  stars: number;
+  forks: number;
+  updatedAt: string;
+}
 
 export async function fetchRepoMetadata(repoUrl: string): Promise<GitHubRepo | null> {
   try {
