@@ -43,7 +43,7 @@ export default function Settings() {
         headers: import.meta.env.DEV ? { 'X-Dev-Email': 'dev@nyu.edu' } : {},
       });
       if (res.ok) setAccounts(await res.json());
-    } catch {} finally {
+    } catch { } finally {
       setLoadingAccounts(false);
     }
   }
@@ -57,7 +57,7 @@ export default function Settings() {
       await refresh();
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
-    } catch {} finally {
+    } catch { } finally {
       setSaving(false);
     }
   }
@@ -79,7 +79,7 @@ export default function Settings() {
         setAddPlatform('');
         setAddUsername('');
       }
-    } catch {} finally {
+    } catch { } finally {
       setAddingAccount(false);
     }
   }
@@ -91,7 +91,7 @@ export default function Settings() {
         headers: import.meta.env.DEV ? { 'X-Dev-Email': 'dev@nyu.edu' } : {},
       });
       setAccounts(accounts.filter(a => a.platform !== platform));
-    } catch {}
+    } catch { }
   }
 
   const connectedPlatformIds = accounts.map(a => a.platform);
@@ -103,15 +103,15 @@ export default function Settings() {
 
       {/* Profile */}
       <form onSubmit={handleSaveProfile} className="glass rounded-2xl p-6 space-y-4">
-        <h2 className="text-sm font-semibold text-[#e8e6e3] mb-2">Profile</h2>
+        <h2 className="text-sm font-semibold text-txt mb-2">Profile</h2>
 
         <div className="flex items-center gap-4 mb-4">
           {user && <UserAvatar user={user} size="lg" />}
-          <div className="text-sm text-[#7a7a85]">{user?.email}</div>
+          <div className="text-sm text-txt-secondary">{user?.email}</div>
         </div>
 
         <div>
-          <label className="text-xs font-medium text-[#7a7a85] mb-1 block">Display Name</label>
+          <label className="text-xs font-medium text-txt-secondary mb-1 block">Display Name</label>
           <input
             type="text"
             value={name}
@@ -122,7 +122,7 @@ export default function Settings() {
         </div>
 
         <div>
-          <label className="text-xs font-medium text-[#7a7a85] mb-1 block">Bio</label>
+          <label className="text-xs font-medium text-txt-secondary mb-1 block">Bio</label>
           <textarea
             value={bio}
             onChange={e => setBio(e.target.value)}
@@ -133,9 +133,9 @@ export default function Settings() {
         </div>
 
         <div>
-          <label className="text-xs font-medium text-[#7a7a85] mb-1 block">GitHub Username</label>
+          <label className="text-xs font-medium text-txt-secondary mb-1 block">GitHub Username</label>
           <div className="relative">
-            <Github className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+            <Github className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-txt-muted" />
             <input
               type="text"
               value={githubUsername}
@@ -161,13 +161,13 @@ export default function Settings() {
 
       {/* Connected Accounts */}
       <div className="glass rounded-2xl p-6 space-y-4">
-        <h2 className="text-sm font-semibold text-[#e8e6e3] mb-2">Connected Accounts</h2>
-        <p className="text-xs text-[#7a7a85] mb-3">
+        <h2 className="text-sm font-semibold text-txt mb-2">Connected Accounts</h2>
+        <p className="text-xs text-txt-secondary mb-3">
           Link your accounts to easily embed content from these platforms in your posts.
         </p>
 
         {loadingAccounts ? (
-          <Loader2 className="w-5 h-5 text-gray-500 animate-spin" />
+          <Loader2 className="w-5 h-5 text-txt-muted animate-spin" />
         ) : (
           <>
             {accounts.length > 0 && (
@@ -175,17 +175,17 @@ export default function Settings() {
                 {accounts.map((account: any) => {
                   const platform = PLATFORMS.find(p => p.id === account.platform);
                   return (
-                    <div key={account.platform} className="flex items-center justify-between bg-white/5 rounded-xl px-4 py-2.5">
+                    <div key={account.platform} className="flex items-center justify-between bg-surface-raised rounded-xl px-4 py-2.5 border border-white/[0.06]">
                       <div className="flex items-center gap-3">
                         <span className="text-lg">{platform?.icon || '🔗'}</span>
                         <div>
-                          <span className="text-sm font-medium text-[#e8e6e3]">{platform?.label || account.platform}</span>
-                          <span className="text-xs text-[#7a7a85] ml-2">{account.username}</span>
+                          <span className="text-sm font-medium text-txt">{platform?.label || account.platform}</span>
+                          <span className="text-xs text-txt-secondary ml-2">{account.username}</span>
                         </div>
                       </div>
                       <button
                         onClick={() => handleRemoveAccount(account.platform)}
-                        className="p-1 rounded-lg hover:bg-red-900/30 text-gray-500 hover:text-red-400 transition-colors"
+                        className="p-1 rounded-lg hover:bg-danger/10 text-txt-muted hover:text-danger transition-colors"
                         title="Disconnect"
                       >
                         <X className="w-4 h-4" />
