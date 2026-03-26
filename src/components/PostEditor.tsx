@@ -5,7 +5,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { api } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
-import { detectUrl, isUrl, embedTypeLabel } from '@/lib/url-detect';
+import { detectUrl, isUrl } from '@/lib/url-detect';
 import EmbedRenderer, { type MediaBlock } from './EmbedRenderer';
 
 export default function PostEditor() {
@@ -118,8 +118,8 @@ export default function PostEditor() {
             type="button"
             onClick={() => setVisibility(v => v === 'shared' ? 'private' : 'shared')}
             className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-medium transition-colors ${visibility === 'shared'
-                ? 'bg-success/10 text-success border border-success/20'
-                : 'bg-amber/10 text-amber border border-amber/20'
+              ? 'bg-success/10 text-success border border-success/20'
+              : 'bg-amber/10 text-amber border border-amber/20'
               }`}
           >
             {visibility === 'shared' ? <Globe className="w-3 h-3" /> : <Lock className="w-3 h-3" />}

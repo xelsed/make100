@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ExternalLink, Github, Play, Image as ImageIcon, Link as LinkIcon, MessageCircle } from 'lucide-react';
 import type { EmbedType } from '@/lib/url-detect';
 import { fetchRepoMetadata, getLanguageColor } from '@/lib/github';
@@ -194,7 +194,7 @@ function GenericLink({ url, meta }: { url: string; meta?: Record<string, any> })
       <div className="flex items-center gap-2">
         <LinkIcon className="w-4 h-4 text-gray-400" />
         <span className="text-brand-400 font-medium text-sm truncate group-hover:text-brand-300 transition-colors">
-          {meta?.title || new URL(url).hostname}
+          {meta?.title || (() => { try { return new URL(url).hostname; } catch { return url; } })()}
         </span>
         <ExternalLink className="w-3 h-3 text-gray-600 opacity-0 group-hover:opacity-100 transition-opacity" />
       </div>

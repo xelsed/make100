@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Flame, Clock, Filter, Loader2 } from 'lucide-react';
+import { Flame, Clock, Filter, Loader2, Users, PenSquare } from 'lucide-react';
 import PostCard from '@/components/PostCard';
+import UserAvatar from '@/components/UserAvatar';
 import { api } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
 
@@ -10,27 +11,34 @@ type SortMode = 'recent' | 'day';
 export default function Feed() {
   const { user } = useAuth();
   const [posts, setPosts] = useState<any[]>([]);
+  const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [sort, setSort] = useState<SortMode>('recent');
   const [filterTag, setFilterTag] = useState<string | null>(null);
 
   useEffect(() => {
-    loadPosts();
+    loadData();
   }, [filterTag]);
 
-  async function loadPosts() {
+  async function loadData() {
     setLoading(true);
     try {
-      const result = await api.getPosts({ tag: filterTag || undefined });
-      setPosts(result.posts);
+      const [postsResult, usersResult] = await Promise.all([
+        api.getPosts({ tag: filterTag || undefined }),
+        api.getUsers(),
+      ]);
+      setPosts(postsResult.posts);
+      setUsers(usersResult);
     } catch {
       setPosts([]);
+      setUsers([]);
     } finally {
       setLoading(false);
     }
   }
 
   const allTags = [...new Set(posts.flatMap((p: any) => p.tags || []))].sort();
+  const isSingleUser = users.length <= 1;
 
   const sorted = [...posts].sort((a, b) => {
     if (sort === 'day') return b.day_number - a.day_number;
@@ -38,21 +46,54 @@ export default function Feed() {
   });
 
   const maxDay = posts.length > 0 ? Math.max(...posts.map((p: any) => p.day_number)) : 0;
+  const totalPosts = posts.length;
 
   return (
     <div>
-      {/* Hero */}
+      {/* Hero — adapts to single vs multi-user */}
       <div className="mb-8">
-        <h1 className="text-3xl font-extrabold gradient-text mb-2">100 Days in Making</h1>
+        <h1 className="text-3xl font-extrabold gradient-text mb-2">
+          {isSingleUser ? `${user?.name || 'Your'} Workshop` : '100 Days in Making'}
+        </h1>
         <p className="text-[#7a7a85] text-sm">
-          A daily log of experiments, builds, and discoveries.
+          {isSingleUser
+            ? `Day ${maxDay} of 100 — ${totalPosts} experiment${totalPosts !== 1 ? 's' : ''} logged.`
+            : `${users.length} makers building for 100 days.`
+          }
         </p>
       </div>
+
+      {/* Multi-user: Welcome center with user cards */}
+      {!isSingleUser && !loading && users.length > 0 && (
+        <div className="glass rounded-xl p-4 mb-6">
+          <div className="flex items-center gap-2 mb-3">
+            <Users className="w-4 h-4 text-[#7a7a85]" />
+            <span className="text-xs font-medium text-[#7a7a85]">Makers</span>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+            {users.map((u: any) => {
+              const userPosts = posts.filter((p: any) => p.user_id === u.id || p.user?.id === u.id);
+              const userMaxDay = userPosts.length > 0 ? Math.max(...userPosts.map((p: any) => p.day_number)) : 0;
+              return (
+                <div key={u.id} className="flex items-center gap-2.5 bg-white/5 rounded-xl p-2.5">
+                  <UserAvatar user={u} size="sm" />
+                  <div className="min-w-0">
+                    <div className="text-xs font-medium text-[#e8e6e3] truncate">{u.name}</div>
+                    <div className="text-[10px] text-[#7a7a85]">Day {userMaxDay}</div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Progress bar */}
       <div className="glass rounded-xl p-4 mb-6">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-xs font-medium text-[#7a7a85]">Progress</span>
+          <span className="text-xs font-medium text-[#7a7a85]">
+            {isSingleUser ? 'Your Progress' : 'Group Progress'}
+          </span>
           <span className="text-xs font-bold text-brand-400">
             {maxDay} / 100 days
           </span>
@@ -64,6 +105,17 @@ export default function Feed() {
           />
         </div>
       </div>
+
+      {/* Single-user: quick action */}
+      {isSingleUser && !loading && (
+        <Link
+          to="/new"
+          className="block glass rounded-xl p-4 mb-6 glass-hover group text-center"
+        >
+          <PenSquare className="w-5 h-5 text-brand-400 mx-auto mb-1.5 group-hover:scale-110 transition-transform" />
+          <span className="text-sm font-medium text-[#e8e6e3]">Log Day {maxDay + 1}</span>
+        </Link>
+      )}
 
       {/* Controls */}
       <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
