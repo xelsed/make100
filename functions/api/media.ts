@@ -8,12 +8,11 @@ const ALLOWED_IMAGE_TYPES = [
 ];
 
 const ALLOWED_VIDEO_TYPES = [
-  'video/mp4', 'video/webm', 'video/quicktime', 'video/x-msvideo',
-  'video/x-matroska', 'video/ogg',
+  'video/mp4', 'video/webm',
 ];
 
 const MAX_IMAGE_SIZE = 10 * 1024 * 1024;   // 10 MB
-const MAX_VIDEO_SIZE = 500 * 1024 * 1024;  // 500 MB
+const MAX_VIDEO_SIZE = 100 * 1024 * 1024;  // 100 MB
 
 export const onRequestPost: PagesFunction<Env> = async (context) => {
   const user = (context.data as any).user;
@@ -30,7 +29,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 
   if (!isImage && !isVideo) {
     return Response.json({
-      error: `File type ${file.type} not allowed. Accepted: images (JPEG, PNG, GIF, WebP, SVG) and videos (MP4, WebM, MOV, AVI, MKV)`,
+      error: `File type ${file.type} not allowed. Accepted: images (JPEG, PNG, GIF, WebP, SVG) and videos (MP4, WebM)`,
     }, { status: 415 });
   }
 
