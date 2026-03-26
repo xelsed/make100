@@ -1,0 +1,62 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: #374151 transparent;
+  }
+
+  ::selection {
+    background-color: rgba(12, 142, 235, 0.3);
+  }
+}
+
+@layer components {
+  .glass {
+    @apply bg-white/5 backdrop-blur-xl border border-white/10;
+  }
+
+  .glass-hover {
+    @apply hover:bg-white/10 hover:border-white/20 transition-all duration-200;
+  }
+
+  .gradient-text {
+    @apply bg-gradient-to-r from-brand-400 to-purple-400 bg-clip-text text-transparent;
+  }
+
+  .post-card {
+    @apply glass rounded-2xl p-6 animate-fade-in glass-hover cursor-default;
+  }
+
+  .btn-primary {
+    @apply bg-brand-600 hover:bg-brand-500 text-white font-medium px-4 py-2 rounded-xl transition-all duration-200 active:scale-95;
+  }
+
+  .btn-ghost {
+    @apply hover:bg-white/10 text-gray-300 hover:text-white font-medium px-4 py-2 rounded-xl transition-all duration-200;
+  }
+
+  .input-field {
+    @apply bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-gray-100 placeholder-gray-500 focus:outline-none focus:border-brand-500/50 focus:ring-1 focus:ring-brand-500/25 transition-all duration-200;
+  }
+
+  .tag {
+    @apply inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-white/10 text-gray-300 hover:bg-white/15 transition-colors;
+  }
+}
+
+.markdown-body h1 { @apply text-2xl font-bold mb-4 mt-6; }
+.markdown-body h2 { @apply text-xl font-semibold mb-3 mt-5; }
+.markdown-body h3 { @apply text-lg font-semibold mb-2 mt-4; }
+.markdown-body p { @apply mb-3 leading-relaxed text-gray-300; }
+.markdown-body ul { @apply list-disc pl-6 mb-3 space-y-1 text-gray-300; }
+.markdown-body ol { @apply list-decimal pl-6 mb-3 space-y-1 text-gray-300; }
+.markdown-body code { @apply font-mono text-sm bg-white/10 px-1.5 py-0.5 rounded text-brand-300; }
+.markdown-body pre { @apply bg-gray-900/80 border border-white/10 rounded-xl p-4 mb-4 overflow-x-auto; }
+.markdown-body pre code { @apply bg-transparent px-0 py-0; }
+.markdown-body blockquote { @apply border-l-2 border-brand-500 pl-4 italic text-gray-400 mb-3; }
+.markdown-body a { @apply text-brand-400 hover:text-brand-300 underline underline-offset-2; }
+.markdown-body img { @apply rounded-xl max-w-full my-4; }
+.markdown-body hr { @apply border-white/10 my-6; }
