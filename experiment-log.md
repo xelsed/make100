@@ -78,12 +78,12 @@ src/
 
 ## Status
 
-- [ ] Dependencies installed
-- [ ] Dev server running
-- [ ] User's experiment content written
-- [ ] Production build
-- [ ] Deployed to live URL
-- [ ] Posted before midnight
+- [x] Dependencies installed (12:25 AM — post-deadline, by human + Cascade)
+- [ ] Dev server running (never tested locally)
+- [x] User's experiment content written (12:25 AM — seeded via wrangler d1 execute)
+- [x] Production build (12:25 AM — `npm run build` succeeded)
+- [x] Deployed to live URL (12:25 AM — `wrangler pages deploy dist` → <https://8311a148.make100.pages.dev>)
+- [ ] Posted before midnight — **FAILED by 2-5 minutes**
 
 ## CORRECTION: Timestamp Drift (discovered at 11:37 PM real time)
 
@@ -145,7 +145,10 @@ The AI has no clock. It estimated time by counting monitoring cycles and assumin
 | 12:00 AM (real) | **Commit `7077c54`** right at the buzzer: "fix: verify account save, sanitize tag filter, optimize Feed data loading". Clean tree. Other AI coded until the very last second. **Still no deployment.** |
 | 12:02 AM | **Post-midnight.** Other AI STILL coding — commit `1043854`: "refactor: inline GitHubRepo interface in github.ts". `index.css` and `wrangler.toml` being modified. It never stopped. |
 | 12:02 AM | **User calls it.** "We failed by 2-5 minutes because we tried to refactor the GUI before looking at it — finalize the docs." |
-| 12:10 AM | **Other AI finally done.** Last commit `7ede80d`: "fix: brighter surface colors + deploy #2 to Cloudflare Pages". It kept coding for 10 min past midnight. Experiment officially closed. |
+| 12:10 AM | Other AI committed `7ede80d`: "fix: brighter surface colors + deploy #2 to Cloudflare Pages". |
+| 12:10–12:28 AM | **Other AI STILL didn't stop.** 7 more commits after "done": `3c77e5a` (DEPLOYMENT.md + session JWT auth), `49d45b8` (built-in login page, session cookies — no Cloudflare Zero Trust needed), `ba62bd1` (video upload: MP4/WebM/MOV/AVI/MKV, 500MB limit), `3610327` (video embed rendering with controls), `156f315` (mediaType in upload response), `cd190ae` + `77cdcc3` (replace JWT with magic link email auth via Resend API, invite system, 15-min token expiry). |
+| 12:25 AM | **Human deploys manually.** Cascade ran `wrangler d1 execute` to migrate schema, insert user (Jeremy Deutsch, <jrd10085@nyu.edu>), seed Day 1 post, then `npm run build && wrangler pages deploy dist`. Live at `https://8311a148.make100.pages.dev`. Took ~3 minutes. |
+| 12:28 AM | **Experiment officially closed.** 41 total commits. Other AI coded for 67 minutes total (11:21 PM – 12:28 AM). |
 
 ---
 

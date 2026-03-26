@@ -45,7 +45,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${resendKey}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        from: 'make100 <noreply@m100.dev>',
+        from: 'make100 <onboarding@resend.dev>',
         to: [email],
         subject: 'Your make100 login link',
         html: `

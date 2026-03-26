@@ -1,7 +1,7 @@
 INSERT OR IGNORE INTO posts (id, user_id, day_number, title, content, visibility, tags, media)
 VALUES (
   'day1-racing-the-clock',
-  'jeremy-deutsch-001',
+  '7ef65aac-ae17-4ce9-9777-3c83dc2f392d',
   1,
   'Racing the Clock — Can AI Ship a Website Before Midnight?',
   'It''s 11:21 PM on a Tuesday night. I have exactly 39 minutes until midnight. The challenge: can an AI build and ship a full website before the clock strikes twelve?
