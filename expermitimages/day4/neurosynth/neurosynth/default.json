@@ -1,0 +1,36 @@
+{
+    "name": "Euclidean Rhythm 8-beat",
+    "timeout_s": 10801,
+    "cycle_length": 8,
+    "bpm": 80,
+    "tick_rate_hz": 30,
+    "assay": {
+        "duration_s": 60,
+        "active_channel_threshold_hz": 0.2
+    },
+    "clock_stimulus": {
+        "stim_every_n_ticks": 3,
+        "current_ua": 1.5,
+        "phase_width_us": 180
+    },
+    "reward_feedback": {
+        "current_ua": 2.5,
+        "phase_width_us": 160,
+        "frequency_hz": 100,
+        "duration_s": 0.1
+    },
+    "punishment_feedback": {
+        "current_ua": 1.5,
+        "phase_width_us": 160,
+        "freq_min_hz": 3,
+        "freq_max_hz": 25,
+        "firing_probability": 0.33,
+        "duration_s": 0.5
+    },
+    "threshold": {
+        "window_size": 16,
+        "initial_value": 2.0
+    },
+    "sensory_channels": [1, 2, 3, 8, 9, 10, 11, 16, 17, 18, 19, 24, 25, 26, 27, 32, 33, 34, 35, 40, 41, 42, 43, 48, 49, 50, 51, 57, 58, 59],
+    "motor_channels": [5, 6, 12, 13, 14, 15, 20, 21, 22, 23, 28, 29, 30, 31, 36, 37, 38, 39, 44, 45, 46, 47, 52, 53, 54, 55, 60, 61, 62]
+}

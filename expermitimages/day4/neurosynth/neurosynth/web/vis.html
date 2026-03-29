@@ -1,0 +1,119 @@
+<div class="visualiser-container">
+    <div class="top-row">
+        <fieldset>
+            <legend>Rhythm Visualizer</legend>
+            <div class="canvas-container">
+                <canvas id="circleCanvas" width="380" height="380"></canvas>
+            </div>
+            <div class="legend-text">Filled = FIRE, hollow = SILENT. Ghost = nearest Euclidean.</div>
+        </fieldset>
+        <fieldset>
+            <legend>Electrode Activity</legend>
+            <div class="canvas-container" style="position:relative;">
+                <canvas id="meaCanvas" width="400" height="400"></canvas>
+                <div id="meaHighlight" class="canvas-highlight" hidden></div>
+            </div>
+            <div class="legend-container">
+                <div class="legend-item">
+                    <span class="legend-color" style="background:#c46aeb;"></span>
+                    <span>Stimulation</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-color" style="background:linear-gradient(90deg,#f0e68c,#ff984f);"></span>
+                    <span>Spikes</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-color" style="background:#1a1030;"></span>
+                    <span>Sensory</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-color" style="background:#0a1a28;"></span>
+                    <span>Motor</span>
+                </div>
+            </div>
+        </fieldset>
+    </div>
+    <fieldset>
+        <legend>Training Stats</legend>
+        <table class="info-table">
+            <tbody>
+                <tr>
+                    <td>Cycles:</td><td id="statCycles">0</td>
+                    <td>Euclidean Matches:</td><td id="statMatches">0</td>
+                </tr>
+                <tr>
+                    <td>Match Rate (last 10):</td><td id="statRate">--</td>
+                    <td>Last Match:</td><td id="statLastMatch">--</td>
+                </tr>
+                <tr>
+                    <td>Overall Rate:</td><td id="statOverall">--</td>
+                    <td>Avg Hamming (misses):</td><td id="statHamming">--</td>
+                </tr>
+                <tr>
+                    <td>Dominant Patterns:</td><td id="statDominant" colspan="3">--</td>
+                </tr>
+            </tbody>
+        </table>
+    </fieldset>
+    <div class="top-row">
+        <fieldset>
+            <legend>FEP Feedback (last cycle)</legend>
+            <div id="fepFeedback" style="font-size:0.70rem;color:#999;padding:6px 8px;min-height:60px;">
+                <div style="color:#666;">Waiting for first cycle...</div>
+                <div style="margin-top:6px;font-size:0.6rem;color:#555;">
+                    FEP = Free Energy Principle. Euclidean patterns get structured reward (low surprise).
+                    Non-Euclidean get random punishment (high surprise). The neurons should learn to minimize surprise.
+                </div>
+            </div>
+        </fieldset>
+        <fieldset>
+            <legend>Pattern Comparison</legend>
+            <div id="patternCompare" style="font-size:0.70rem;color:#999;padding:6px 8px;min-height:60px;">
+                <div style="color:#666;">Waiting for first cycle...</div>
+            </div>
+        </fieldset>
+    </div>
+    <fieldset>
+        <legend>k-Distribution (pulse counts)</legend>
+        <div id="kDistDisplay" style="font-size:0.72rem;color:#999;padding:4px 8px;">Waiting for data...</div>
+    </fieldset>
+    <fieldset>
+        <legend>Feedback Log (last 20 cycles)</legend>
+        <div id="feedbackLog" style="font-size:0.62rem;color:#999;padding:4px 8px;max-height:150px;overflow-y:auto;font-family:monospace;">Waiting for data...</div>
+    </fieldset>
+    <fieldset>
+        <legend>Audio</legend>
+        <div class="audio-controls" id="audioControls">
+            <button id="btnMute" type="button">Mute</button>
+            <label>Vol: <input type="range" id="audioVolume" min="0" max="100" value="25"></label>
+            <label><input type="checkbox" id="audBeats" checked> Beats</label>
+            <label><input type="checkbox" id="audRhythm" checked> Rhythm</label>
+            <label><input type="checkbox" id="audFeedback" checked> Feedback</label>
+        </div>
+    </fieldset>
+    <fieldset>
+        <legend>Current Cycle</legend>
+        <div class="cycle-monitor">
+            <div class="cycle-grid" id="cycleGrid"></div>
+            <div class="cycle-info">
+                Pattern: <strong id="patternDisplay">--</strong>
+                <span id="cycleResult" style="margin-left:12px;"></span>
+            </div>
+        </div>
+    </fieldset>
+    <fieldset>
+        <legend>Learning Curve</legend>
+        <div class="canvas-container">
+            <canvas id="learningCanvas" width="900" height="200"></canvas>
+        </div>
+    </fieldset>
+    <fieldset>
+        <legend>Spike Raster Plot</legend>
+        <div class="canvas-container" style="position:relative;">
+            <canvas id="rasterCanvas" width="900" height="260"></canvas>
+            <div id="rasterHighlight" class="canvas-highlight" hidden></div>
+        </div>
+        <div class="raster-desc">White/amber = spikes, cyan = stim. Dashed = beat boundary.</div>
+    </fieldset>
+    <div id="rasterTooltip" class="raster-tooltip" hidden></div>
+</div>

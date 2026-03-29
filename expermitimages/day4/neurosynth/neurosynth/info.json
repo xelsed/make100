@@ -1,0 +1,7 @@
+{
+    "name": "NeuroSynth",
+    "version": "0.1.0",
+    "description": "Can neurons self-organize into Euclidean rhythms? Reward structured patterns, punish random ones, and watch for learning.",
+    "author": "Cortical Labs",
+    "config_version": 1
+}
