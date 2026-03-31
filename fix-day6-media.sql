@@ -1,0 +1,1 @@
+UPDATE posts SET media = '[{"type":"image","url":"/api/media/day6/cortical-console.png?v=1","alt":"Cortical Labs web console showing EvoSynth running - electrode activity grid, rhythm visualizer showing NOT EUCLIDEAN, 603 cycles completed"}]' WHERE id = 'day6-neurons-dont-know-time';
