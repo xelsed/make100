@@ -1,0 +1,1 @@
+UPDATE posts SET media = '[{"type":"image","url":"/api/media/day9/brain-vs-cell-ethics.svg?v=1","alt":"Brain vs Cell ethics diagram: single neuron being shocked (concern 0%) vs whole brain being shocked (concern 85%), with the question - where is the line? Ken asks: whose cells are these?"}]' WHERE id = 'day9-ethics-shocking';
