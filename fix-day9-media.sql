@@ -1,0 +1,1 @@
+UPDATE posts SET media = '[{"type":"image","url":"/api/media/day9/seder-experiment.svg?v=1","alt":"Seder Experiment diagram: Age vs Afikomen Speed - showing youngest found first, oldest (who designed experiment) found last, with design flaws listed"}]' WHERE id = 'day9-seder-afikomen';

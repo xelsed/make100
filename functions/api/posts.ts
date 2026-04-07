@@ -37,7 +37,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     bindings.push(cursor);
   }
 
-  query += ' ORDER BY p.created_at DESC LIMIT ?';
+  query += ' ORDER BY p.day_number DESC LIMIT ?';
   bindings.push(limit);
 
   const posts = await context.env.DB.prepare(query).bind(...bindings).all();
