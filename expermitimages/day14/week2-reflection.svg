@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" style="background:#09090b;font-family:system-ui,sans-serif">
+  <!-- Title -->
+  <text x="400" y="35" text-anchor="middle" fill="#84cc16" font-size="18" font-weight="700">Week 2: What I Saw vs What Could Be</text>
+
+  <!-- Left side: scattered platforms -->
+  <g transform="translate(200, 200)">
+    <text x="0" y="-110" text-anchor="middle" fill="#6b6f7b" font-size="12" font-weight="600">How classmates share now</text>
+    
+    <!-- Scattered icons -->
+    <rect x="-80" y="-80" width="50" height="50" rx="8" fill="#27272a" stroke="#464a55" stroke-width="1"/>
+    <text x="-55" y="-50" text-anchor="middle" fill="#464a55" font-size="8">Tumblr</text>
+    
+    <rect x="30" y="-85" width="50" height="50" rx="8" fill="#27272a" stroke="#464a55" stroke-width="1"/>
+    <text x="55" y="-55" text-anchor="middle" fill="#464a55" font-size="8">Notion</text>
+    
+    <rect x="-50" y="-15" width="50" height="50" rx="8" fill="#27272a" stroke="#464a55" stroke-width="1"/>
+    <text x="-25" y="15" text-anchor="middle" fill="#464a55" font-size="8">GitHub</text>
+    
+    <rect x="50" y="-5" width="50" height="50" rx="8" fill="#27272a" stroke="#464a55" stroke-width="1"/>
+    <text x="75" y="25" text-anchor="middle" fill="#464a55" font-size="8">Discord</text>
+    
+    <rect x="-20" y="55" width="50" height="50" rx="8" fill="#27272a" stroke="#464a55" stroke-width="1"/>
+    <text x="5" y="85" text-anchor="middle" fill="#464a55" font-size="8">Google<tspan x="5" dy="10">Docs</tspan></text>
+
+    <!-- Disconnected lines -->
+    <line x1="-55" y1="-30" x2="-25" y2="-15" stroke="#27272a" stroke-width="1" stroke-dasharray="3,3"/>
+    <line x1="55" y1="-35" x2="75" y2="-5" stroke="#27272a" stroke-width="1" stroke-dasharray="3,3"/>
+    <line x1="5" y1="55" x2="50" y2="45" stroke="#27272a" stroke-width="1" stroke-dasharray="3,3"/>
+  </g>
+
+  <!-- Arrow -->
+  <text x="400" y="200" text-anchor="middle" fill="#84cc16" font-size="40">→</text>
+  <text x="400" y="225" text-anchor="middle" fill="#84cc16" font-size="10" opacity="0.6">what if?</text>
+
+  <!-- Right side: unified feed -->
+  <g transform="translate(600, 200)">
+    <text x="0" y="-110" text-anchor="middle" fill="#84cc16" font-size="12" font-weight="600">One shared feed</text>
+    
+    <!-- Unified card stack -->
+    <rect x="-75" y="-85" width="150" height="40" rx="8" fill="#18181b" stroke="#84cc16" stroke-width="1" opacity="0.5"/>
+    <circle cx="-55" cy="-65" r="8" fill="#84cc16" opacity="0.3"/>
+    <rect x="-40" y="-72" width="60" height="5" rx="2" fill="#84cc16" opacity="0.2"/>
+    <rect x="-40" y="-62" width="80" height="3" rx="1" fill="#27272a"/>
+    <text x="60" y="-60" fill="#84cc16" font-size="8" opacity="0.5">KC</text>
+    
+    <rect x="-75" y="-35" width="150" height="40" rx="8" fill="#18181b" stroke="#84cc16" stroke-width="1.5"/>
+    <circle cx="-55" cy="-15" r="8" fill="#84cc16" opacity="0.5"/>
+    <rect x="-40" y="-22" width="60" height="5" rx="2" fill="#84cc16" opacity="0.3"/>
+    <rect x="-40" y="-12" width="80" height="3" rx="1" fill="#27272a"/>
+    <text x="60" y="-10" fill="#84cc16" font-size="8">You</text>
+
+    <rect x="-75" y="15" width="150" height="40" rx="8" fill="#18181b" stroke="#84cc16" stroke-width="1" opacity="0.5"/>
+    <circle cx="-55" cy="35" r="8" fill="#84cc16" opacity="0.3"/>
+    <rect x="-40" y="28" width="60" height="5" rx="2" fill="#84cc16" opacity="0.2"/>
+    <rect x="-40" y="38" width="80" height="3" rx="1" fill="#27272a"/>
+    <text x="60" y="40" fill="#84cc16" font-size="8" opacity="0.5">Kayla</text>
+    
+    <rect x="-75" y="65" width="150" height="40" rx="8" fill="#18181b" stroke="#84cc16" stroke-width="1" opacity="0.3"/>
+    <circle cx="-55" cy="85" r="8" fill="#84cc16" opacity="0.2"/>
+    <rect x="-40" y="78" width="60" height="5" rx="2" fill="#84cc16" opacity="0.15"/>
+    <rect x="-40" y="88" width="80" height="3" rx="1" fill="#27272a"/>
+    <text x="60" y="90" fill="#84cc16" font-size="8" opacity="0.3">Amanda</text>
+  </g>
+
+  <!-- Bottom text -->
+  <text x="400" y="360" text-anchor="middle" fill="#6b6f7b" font-size="11">Seeing KC post her experiments is motivating. Everyone scattered across platforms is not.</text>
+  <text x="400" y="380" text-anchor="middle" fill="#84cc16" font-size="11" font-weight="600">A unified feed changes the dynamic.</text>
+</svg>
